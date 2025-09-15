@@ -175,3 +175,75 @@ body{
   .grid{grid-template-columns: 1fr; --card-w:auto}
   .card{width:100%}
 }
+
+
+/* نفس ألوان الصفحة الأولى */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Arial;
+  background:#8c9a95;                 /* رمادي مخضر */
+  background:linear-gradient(#8e9a95,#7f8a85);
+  color:#1f2421;
+}
+
+/* تخطيط: يمين للمدير + وسط للأدوات */
+.wrap{max-width:1200px;margin:0 auto;padding:20px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.head h1{margin:0;font-size:22px;color:#0b1a15}
+.meta{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.meta input[type=date]{padding:8px 10px;border:1px solid #d5d8dc;border-radius:6px;background:#fff}
+
+.account{background:#e9efe9;border:1px solid rgba(0,0,0,.08);padding:8px 10px;border-radius:10px}
+.acc-line{font-size:14px;margin:2px 0}
+.tag{color:#445a53;margin-left:6px}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px;margin-top:6px}
+
+.layout{
+  display:grid;
+  grid-template-columns: 360px 1fr;   /* يمين المدير - يسار الأدوات */
+  gap:18px;
+  align-items:start;
+  margin-top:16px;
+}
+.side,.panel{
+  background:#ffffff;border:1px solid #e3e6e9;border-radius:12px; padding:16px 14px;
+  box-shadow:0 2px 0 rgba(0,0,0,.06)
+}
+
+/* مركز الأدوات فعليًا */
+.center{max-width:700px;margin-inline:auto}
+
+.panel-title{margin:0 0 10px;font-size:18px}
+.sub{margin:16px 0 8px;font-size:16px}
+
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row label{display:flex;flex-direction:column;gap:6px;min-width:200px}
+input[type=text],input[type=time],select{
+  padding:10px 12px;border:1px solid #d5d8dc;border-radius:10px;background:#fff;min-width:200px
+}
+.btn{
+  border:1px solid #c9ced3;background:#eef1f4;border-radius:12px;padding:10px 14px;cursor:pointer;
+  display:inline-flex;gap:8px;align-items:center;justify-content:center
+}
+.btn svg{display:block}
+.btn.primary{background:#316655;color:#fff;border-color:#316655}
+.btn.ghost{background:#f4f6f7}
+
+.hint{font-size:12px;color:#5b646a;margin-bottom:8px}
+
+.tbl{width:100%;border-collapse:separate;border-spacing:0 8px}
+.tbl th{font-size:13px;text-align:right;color:#5b646a;padding:6px 4px}
+.tbl td{background:#f9fbfc;border:1px solid #e3e6e9;padding:10px;border-radius:10px}
+.tbl select,.tbl input{width:100%}
+
+.end{justify-content:flex-end;gap:8px}
+
+.log{list-style:none;margin:8px 0 0;padding:0}
+.log li{
+  background:#f9fbfc;border:1px solid #e3e6e9;padding:10px 12px;border-radius:10px;margin-bottom:6px;font-size:14px
+}
+
+.final{margin-top:10px;background:#e8f5e9;border:
+}
