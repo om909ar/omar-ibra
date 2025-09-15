@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>الحضور والانصراف</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="attendance.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="head">
+      <h1>الحضور والانصراف</h1>
+      <div class="meta">
+        <label>تاريخ اليوم:
+          <input type="date" id="attDate">
+        </label>
+        <button id="roleToggle" class="btn ghost" aria-pressed="false" title="التبديل بين موظف/مدير">أنا موظف</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- موظف -->
+      <section class="panel" id="employeePanel">
+        <h2 class="panel-title">بيانات الموظف</h2>
+        <div class="row">
+          <label>الاسم
+            <input type="text" id="empName" placeholder="اسم الموظف">
+          </label>
+          <label>المرتبة/الدرجة
+            <input type="text" id="empRank" placeholder="مثال: المرتبة السادسة">
+          </label>
+        </div>
+
+        <h3 class="sub">التحضير</h3>
+        <div class="row">
+          <label>الوقت
+            <input type="time" id="checkTime">
+          </label>
+          <button id="btnCheckIn" class="btn primary">تسجيل حضور</button>
+          <button id="btnCheckOut" class="btn">تسجيل انصراف</button>
+        </div>
+
+        <h3 class="sub">الطلبات</h3>
+        <div class="row">
+          <label>نوع الطلب
+            <select id="reqType">
+              <option value="">— اختر —</option>
+              <option value="partial">استئذان جزئي</option>
+              <option value="full">استئذان كلي</option>
+              <option value="leave">إجازة</option>
+            </select>
+          </label>
+          <label>من
+            <input type="time" id="fromTime">
+          </label>
+          <label>إلى
+            <input type="time" id="toTime">
+          </label>
+          <button id="btnAddReq" class="btn">إضافة الطلب</button>
+        </div>
+
+        <div class="list">
+          <h3 class="sub">سجل اليوم</h3>
+          <ul id="empLog" class="log"></ul>
+        </div>
+      </section>
+
+      <!-- مدير -->
+      <aside class="side" id="managerPanel" hidden>
+        <h2 class="panel-title">تحضير الإدارة</h2>
+        <div class="hint">هذه القائمة تظهر فقط للمديرين.</div>
+        <div class="row">
+          <label>قسم/إدارة
+            <input type="text" id="deptName" placeholder="اسم الإدارة">
+          </label>
+        </div>
+
+        <table class="tbl" id="mgrTable" aria-label="قائمة الموظفين">
+          <thead>
+            <tr><th>ال
