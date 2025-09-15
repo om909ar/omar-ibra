@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>الحضور والانصراف</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
@@ -15,13 +15,50 @@
         <label>تاريخ اليوم:
           <input type="date" id="attDate">
         </label>
-        <button id="roleToggle" class="btn ghost" aria-pressed="false" title="التبديل بين موظف/مدير">أنا موظف</button>
+        <!-- عرض اسم الحساب ومرتبته (قراءة فقط) -->
+        <div class="account">
+          <div class="acc-line"><span class="tag">الاسم:</span> <b id="accName">—</b></div>
+          <div class="acc-line"><span class="tag">المرتبة:</span> <b id="accRank">—</b></div>
+          <button id="editAccount" class="btn ghost sm" title="تعديل بيانات الحساب">تعديل الحساب</button>
+        </div>
       </div>
     </header>
 
     <main class="layout">
-      <!-- موظف -->
-      <section class="panel" id="employeePanel">
+      <!-- لوحة المدير في اليمين -->
+      <aside class="side" id="managerPanel">
+        <h2 class="panel-title">تحضير الإدارة</h2>
+        <div class="hint">هذه الأدوات للمدير.</div>
+        <div class="row">
+          <label>القسم/الإدارة
+            <input type="text" id="deptName" placeholder="اسم الإدارة">
+          </label>
+        </div>
+
+        <table class="tbl" id="mgrTable" aria-label="قائمة الموظفين">
+          <thead>
+            <tr><th>الموظف</th><th>الحالة</th><th>ملاحظات</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="row end">
+          <button id="btnAddRow" class="btn ghost">
+            <!-- plus icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span>إضافة موظف</span>
+          </button>
+          <button id="btnFinalize" class="btn primary">
+            <!-- send icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>
+            <span>توجيه الحضور للموارد البشرية</span>
+          </button>
+        </div>
+        <div id="finalMsg" class="final" hidden></div>
+      </aside>
+
+      <!-- الأدوات في الوسط -->
+      <section class="panel center" id="employeePanel">
         <h2 class="panel-title">بيانات الموظف</h2>
         <div class="row">
           <label>الاسم
@@ -37,8 +74,16 @@
           <label>الوقت
             <input type="time" id="checkTime">
           </label>
-          <button id="btnCheckIn" class="btn primary">تسجيل حضور</button>
-          <button id="btnCheckOut" class="btn">تسجيل انصراف</button>
+          <button id="btnCheckIn" class="btn primary">
+            <!-- check-in icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span>تسجيل حضور</span>
+          </button>
+          <button id="btnCheckOut" class="btn">
+            <!-- checkout icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M10 17l5-5-5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M4 12h10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span>تسجيل انصراف</span>
+          </button>
         </div>
 
         <h3 class="sub">الطلبات</h3>
@@ -57,7 +102,11 @@
           <label>إلى
             <input type="time" id="toTime">
           </label>
-          <button id="btnAddReq" class="btn">إضافة الطلب</button>
+          <button id="btnAddReq" class="btn">
+            <!-- add doc icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M9 14h6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <span>إضافة الطلب</span>
+          </button>
         </div>
 
         <div class="list">
@@ -65,30 +114,6 @@
           <ul id="empLog" class="log"></ul>
         </div>
       </section>
-
-      <!-- مدير -->
-      <aside class="side" id="managerPanel" hidden>
-        <h2 class="panel-title">تحضير الإدارة</h2>
-        <div class="hint">هذه القائمة تظهر فقط للمديرين.</div>
-        <div class="row">
-          <label>قسم/إدارة
-            <input type="text" id="deptName" placeholder="اسم الإدارة">
-          </label>
-        </div>
-
-        <table class="tbl" id="mgrTable" aria-label="قائمة الموظفين">
-          <thead>
-            <tr><th>الموظف</th><th>الحالة</th><th>ملاحظات</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div class="row end">
-          <button id="btnAddRow" class="btn ghost">+ إضافة موظف</button>
-          <button id="btnFinalize" class="btn primary">توجيه الحضور للموارد البشرية</button>
-        </div>
-        <div id="finalMsg" class="final" hidden></div>
-      </aside>
     </main>
   </div>
 
