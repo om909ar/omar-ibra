@@ -1,38 +1,135 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>صفحة تجريبية</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المنصة الإلكترونية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <img src="logo.png" alt="Logo" class="logo">
-        <h1>مرحبًا بكم في الموقع التجريبي</h1>
+  <div class="page">
+    <header class="topbar">
+      <nav class="pills">
+        <a href="#" class="pill">اختيار المركز</a>
+        <a href="#" class="pill pill-main">مرحبًا بك في المنصة الإلكترونية</a>
+        <a href="#" class="pill">الخروج من المنصة الإلكترونية</a>
+      </nav>
+      <div class="slimbar" aria-hidden="true"></div>
     </header>
 
     <main>
-        <section class="intro">
-            <h2>مقدمة</h2>
-            <p>هذا مثال لتصميم صفحة HTML مع CSS وJavaScript.</p>
-        </section>
+      <section class="grid-wrap">
+        <div class="grid">
+          <!-- Repeatable card -->
+          <!-- You can rename text as needed -->
+          <a class="card" href="#">
+            <img src="icons/browser.svg" alt="" class="card-ic">
+            <span class="card-title">الدعم الفني - المستفيد</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/folder.svg" alt="" class="card-ic">
+            <span class="card-title">التقارير</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/docs.svg" alt="" class="card-ic">
+            <span class="card-title">المراسلات الإلكترونية</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/user.svg" alt="" class="card-ic">
+            <span class="card-title">دليل المستخدم</span>
+          </a>
 
-        <section class="features">
-            <h2>مميزات</h2>
-            <ul>
-                <li>تصميم نظيف</li>
-                <li>CSS منفصل</li>
-                <li>JavaScript تفاعلي</li>
-            </ul>
-            <button id="btnClick">اضغط هنا</button>
-        </section>
+          <a class="card" href="#">
+            <img src="icons/plane.svg" alt="" class="card-ic">
+            <span class="card-title">طلب إجازة/مهمة</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/ticket.svg" alt="" class="card-ic">
+            <span class="card-title">نظام التذاكر</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/library.svg" alt="" class="card-ic">
+            <span class="card-title">مكتبة النماذج</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/hr.svg" alt="" class="card-ic">
+            <span class="card-title">نظم إدارة الموارد البشرية</span>
+          </a>
+
+          <a class="card" href="#">
+            <img src="icons/mobile.svg" alt="" class="card-ic">
+            <span class="card-title">نظام التطبيقات الذكي</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/video.svg" alt="" class="card-ic">
+            <span class="card-title">فيديو إرشادي</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/scale.svg" alt="" class="card-ic">
+            <span class="card-title">قرارات إدارية/مسؤولية</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/chat.svg" alt="" class="card-ic">
+            <span class="card-title">الإعلانات و الرسائل</span>
+          </a>
+
+          <a class="card" href="#">
+            <img src="icons/briefcase.svg" alt="" class="card-ic">
+            <span class="card-title">التدريب وورش العمل</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/shield.svg" alt="" class="card-ic">
+            <span class="card-title">نظام الأمن الداخلي</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/upload.svg" alt="" class="card-ic">
+            <span class="card-title">نموذج إلكتروني خارجي</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/stats.svg" alt="" class="card-ic">
+            <span class="card-title">منصة الإحصاءات</span>
+          </a>
+
+          <a class="card" href="#">
+            <img src="icons/seal.svg" alt="" class="card-ic">
+            <span class="card-title">نظام يسر للخدمات</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/seal.svg" alt="" class="card-ic">
+            <span class="card-title">نظام إدارة المشاريع والإنجاز</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/seal.svg" alt="" class="card-ic">
+            <span class="card-title">نظام الاتصالات الإدارية والوثائق</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/atom.svg" alt="" class="card-ic">
+            <span class="card-title">منصة أمن</span>
+          </a>
+
+          <a class="card" href="#">
+            <img src="icons/atom.svg" alt="" class="card-ic">
+            <span class="card-title">هيئة الذكاء الاصطناعي</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/medal.svg" alt="" class="card-ic">
+            <span class="card-title">تشريفات وإدارة المناسبات</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/badge.svg" alt="" class="card-ic">
+            <span class="card-title">جهة أمنية</span>
+          </a>
+          <a class="card" href="#">
+            <img src="icons/atom.svg" alt="" class="card-ic">
+            <span class="card-title">هيئة الذكاء الاصطناعي - التقنية</span>
+          </a>
+        </div>
+      </section>
     </main>
 
-    <footer>
-        <p>حقوق النشر © 2025</p>
-    </footer>
-
-    <script src="script.js"></script>
+    <img class="expo" src="logo-placeholder.svg" alt="RIYADH EXPO 2030">
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
