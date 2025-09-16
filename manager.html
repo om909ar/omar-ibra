@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>لوحة المدير – الحضور والانصراف</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Arial;
+    background:linear-gradient(#8e9a95,#7f8a85);color:#1f2421
+  }
+  .wrap{max-width:1200px;margin:0 auto;padding:20px}
+
+  /* رأس */
+  .head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .head h1{margin:0;font-size:22px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+  .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .meta input[type=date], .meta input[type=text]{
+    padding:8px 10px;border:1px solid #d5d8dc;border-radius:999px;background:#e9efe9;min-width:160px
+  }
+
+  /* بطاقة */
+  .panel{
+    background:#e9eceb;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:16px;
+    box-shadow:0 4px 0 rgba(0,0,0,.25);margin-top:20px
+  }
+
+  /* أدوات أعلى الجدول */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .btn{border:1px solid #c9ced3;background:#eef1f4;border-radius:10px;padding:8px 12px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;font-weight:600}
+  .btn.primary{background:#316655;color:#fff;border-color:#316655}
+  .btn.accent{background:#2d6a8e;color:#fff;border-color:#2d6a8e}
+  .btn.warn{background:#9c4131;color:#fff;border-color:#9c4131}
+  .btn.ghost{background:#f4f6f7}
+  .search{margin-inline-start:auto;padding:8px 10px;border:1px solid #c9ced3;border-radius:10px;background:#fff;min-width:200px}
+
+  /* جدول */
+  table{width:100%;border-collapse:separate;border-spacing:0 8px}
+  thead th{font-size:13px;color:#2b3330;text-align:right;padding:6px 4px}
+  tbody td{
+    background:#f9fbfc;border:1px solid #dfe5e2;padding:10px;border-radius:10px;vertical-align:middle
+  }
+  tbody input[type=text], tbody input[type=time], tbody select{
+    width:100%;padding:8px 10px;border:1px solid #cfd6d2;border-radius:8px;background:#fff
+  }
+  .empty{padding:14px;background:#fff;border:1px dashed #c9ced3;border-radius:10px;text-align:center}
+
+  .sum{margin-top:10px;font-size:14px;color:#2b3330}
+  .hint{font-size:12px;color:#2b3330;margin-top:10px}
+
+  /* توست */
+  .toast{position:fixed;inset-inline:0;bottom:16px;display:flex;justify-content:center;pointer-events:none;z-index:9999}
+  .toast span{background:#111;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;transform:translateY(10px);transition:.2s}
+  .toast.show span{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <h1>لوحة المدير – الحضور والانصراف</h1>
+    <div class="meta">
+      <label>التاريخ:
+        <input type="date" id="day">
+      </label>
+      <label>الإدارة:
+        <input type="text" id="dept" placeholder="اسم الإدارة/القسم">
+      </label>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="toolbar">
+      <button id="addRow" class="btn ghost">إضافة موظف</button>
+      <button id="saveDay" class="btn primary">حفظ اليوم</button>
+      <button id="exportCSV" class="btn accent">تصدير CSV</button>
+      <button id="finalize" class="btn warn">توجيه للموارد البشرية</button>
+      <input id="search" class="search" type="text" placeholder="بحث بالاسم…">
+    </div>
+
+    <div class="table-wrap">
+      <table id="tbl" aria-label="سجل اليوم">
+        <thead>
+          <tr>
+            <th style="width:22%">الموظف</th>
+            <th style="width:12%">المرتبة</th>
+            <th style="width:12%">الحضور</th>
+            <th style="width:12%">الانصراف</th>
+            <th style="width:14%">الحالة</th>
+            <th>ملاحظات</th>
+            <th style="width:10%">إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="empty" class="empty" hidden>لا يوجد سجلات لهذا اليوم.</div>
+    </div>
+
+    <div id="summary" class="sum">الإجمالي: 0 | حاضر: 0 | متأخر: 0 | غياب: 0 | إجازة: 0 | استئذان: 0</div>
+    <div class="hint">ملاحظة: إذا وصلت الصفحة عبر تحويل من صفحة الموظف، سيتم دمج السجل المرسل تلقائيًا لهذا التاريخ.</div>
+  </section>
+</div>
+
+<div class="toast" id="toast"><span></span></div>
+
+<script>
+(function(){
+  // مفاتيح التخزين
+  const MGR_KEY = 'mgr_records_v1';      // سجلات المدير: { 'YYYY-MM-DD': [rows] }
+  const DEPT_KEY = 'mgr_dept';           // اسم الإدارة الافتراضي
+  const FINAL_KEY = 'mgr_finalized_v1';  // حالات التوجيه HR لكل يوم
+
+  // عناصر DOM
+  const dayEl = document.getElementById('day');
+  const deptEl = document.getElementById('dept');
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+  const summary = document.getElementById('summary');
+  const searchEl = document.getElementById('search');
+
+  const addRowBtn = document.getElementById('addRow');
+  const saveBtn = document.getElementById('saveDay');
+  const exportBtn = document.getElementById('exportCSV');
+  const finalizeBtn = document.getElementById('finalize');
+
+  const toast = (msg)=>{ const t=document.getElementById('toast'); t.querySelector('span').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); };
+  const pad = n => String(n).padStart(2,'0');
+  const todayISO = ()=>{ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+
+  // تخزين/قراءة JSON
+  const load = (k, fb)=> { try{return JSON.parse(localStorage.getItem(k) || fb);}catch(_){return JSON.parse(fb);} };
+  const save = (k, obj)=> localStorage.setItem(k, JSON.stringify(obj));
+
+  // تهيئة التاريخ
+  const params = new URLSearchParams(location.search);
+  dayEl.value = params.get('date') || todayISO();
+
+  // تهيئة الإدارة
+  deptEl.value = localStorage.getItem(DEPT_KEY) || '';
+  deptEl.addEventListener('input', ()=> localStorage.setItem(DEPT_KEY, deptEl.value));
+
+  // قراءة السجل لليوم
+  function getDayRows(date){
+    const all = load(MGR_KEY, '{}');
+    return all[date] || [];
+  }
+  function setDayRows(date, rows){
+    const all = load(MGR_KEY, '{}');
+    all[date] = rows;
+    save(MGR_KEY, all);
+  }
+
+  // دمج سجل وصل من صفحة الموظف (sessionStorage)
+  function mergeIncoming(){
+    const raw = sessionStorage.getItem('last_attendance_payload');
+    if(!raw) return false;
+    const p = JSON.parse(raw);
+    // لو التاريخ مختلف عن المحدد، لا ندمج
+    if(!p || !p.date || p.date !== dayEl.value) return false;
+
+    let rows = getDayRows(dayEl.value);
+
+    // نبحث بالاسم إن كان موجود نحدثه، وإلا نضيف
+    const name = (p.account && p.account.name) ? String(p.account.name).trim() : '—';
+    const rank = (p.account && p.account.rank) ? String(p.account.rank).trim() : '—';
+    const hudur = p.hudur || '';
+    const insiraf = p.insiraf || '';
+
+    const idx = rows.findIndex(r => (r.name||'').trim() === name);
+    if(idx >= 0){
+      rows[idx].hudur = hudur || rows[idx].hudur;
+      rows[idx].insiraf = insiraf || rows[idx].insiraf;
+      if(!rows[idx].rank) rows[idx].rank = rank;
+    }else{
+      rows.push({
+        id: crypto.randomUUID(),
+        name, rank,
+        hudur, insiraf,
+        status: '', // يحددها المدير
+        note: ''
+      });
+    }
+    setDayRows(dayEl.value, rows);
+
+    // نحذف الحمولة عشان ما تتكرر إذا رجع للصفحة
+    sessionStorage.removeItem('last_attendance_payload');
+    return true;
+  }
+
+  // بناء صف
+  function buildRow(r){
+    const tr = document.createElement('tr');
+    tr.dataset.id = r.id;
+
+    // اسم
+    const tdName = document.createElement('td');
+    const inName = document.createElement('input'); inName.type='text'; inName.value=r.name||'';
+    tdName.appendChild(inName);
+
+    // مرتبة
+    const tdRank = document.createElement('td');
+    const inRank = document.createElement('input'); inRank.type='text'; inRank.value=r.rank||'';
+    tdRank.appendChild(inRank);
+
+    // حضور
+    const tdHud = document.createElement('td');
+    const inHud = document.createElement('input'); inHud.type='time'; inHud.value=r.hudur||'';
+    tdHud.appendChild(inHud);
+
+    // انصراف
+    const tdIns = document.createElement('td');
+    const inIns = document.createElement('input'); inIns.type='time'; inIns.value=r.insiraf||'';
+    tdIns.appendChild(inIns);
+
+    // حالة
+    const tdSt = document.createElement('td');
+    const sel = document.createElement('select');
+    ['','حاضر','متأخر','غياب','إجازة','استئذان'].forEach(v=>{
+      const o=document.createElement('option'); o.value=v; o.textContent=(v||'— اختر —');
+      if(v===r.status) o.selected=true; sel.appendChild(o);
+    });
+    tdSt.appendChild(sel);
+
+    // ملاحظة
+    const tdNote = document.createElement('td');
+    const inNote = document.createElement('input'); inNote.type='text'; inNote.placeholder='ملاحظة…'; inNote.value=r.note||'';
+    tdNote.appendChild(inNote);
+
+    // إجراءات
+    const tdAct = document.createElement('td');
+    const del = document.createElement('button'); del.className='btn ghost'; del.textContent='حذف';
+    tdAct.appendChild(del);
+
+    // ربط الأحداث لحفظ حيّ
+    [inName,inRank,inHud,inIns,sel,inNote].forEach(el=>{
+      el.addEventListener('change', ()=> {
+        const rows = getDayRows(dayEl.value);
+        const i = rows.findIndex(x=>x.id===r.id);
+        if(i>=0){
+          rows[i].name = inName.value.trim();
+          rows[i].rank = inRank.value.trim();
+          rows[i].hudur = inHud.value;
+          rows[i].insiraf = inIns.value;
+          rows[i].status = sel.value;
+          rows[i].note = inNote.value.trim();
+          setDayRows(dayEl.value, rows);
+          renderSummary(rows);
+        }
+      });
+    });
+
+    del.addEventListener('click', ()=>{
+      let rows = getDayRows(dayEl.value);
+      rows = rows.filter(x=>x.id!==r.id);
+      setDayRows(dayEl.value, rows);
+      render();
+    });
+
+    tr.append(tdName,tdRank,tdHud,tdIns,tdSt,tdNote,tdAct);
+    return tr;
+  }
+
+  // رسم الجدول
+  function render(){
+    const q = searchEl.value.trim();
+    const rows = getDayRows(dayEl.value);
+    tbody.innerHTML = '';
+    let shown = rows;
+
+    if(q){
+      const qq = q.toLowerCase();
+      shown = rows.filter(r => (r.name||'').toLowerCase().includes(qq));
+    }
+
+    if(shown.length===0){
+      empty.hidden = false;
+    }else{
+      empty.hidden = true;
+      shown.forEach(r => tbody.appendChild(buildRow(r)));
+    }
+    renderSummary(rows);
+    // حالة التوجيه
+    const finAll = load(FINAL_KEY,'{}');
+    finalizeBtn.disabled = !!finAll[dayEl.value];
+  }
+
+  function renderSummary(rows){
+    const total = rows.length;
+    const count = s=> rows.filter(r=>r.status===s).length;
+    summary.textContent = `الإجمالي: ${total} | حاضر: ${count('حاضر')} | متأخر: ${count('متأخر')} | غياب: ${count('غياب')} | إجازة: ${count('إجازة')} | استئذان: ${count('استئذان')}`;
+  }
+
+  // أحداث عامة
+  dayEl.addEventListener('change', ()=> { render(); });
+
+  searchEl.addEventListener('input', ()=> render());
+
+  addRowBtn.addEventListener('click', ()=>{
+    const rows = getDayRows(dayEl.value);
+    rows.push({
+      id: crypto.randomUUID(),
+      name:'', rank:'', hudur:'', insiraf:'', status:'', note:''
+    });
+    setDayRows(dayEl.value, rows);
+    render();
+  });
+
+  saveBtn.addEventListener('click', ()=>{
+    // فعليًا كل تعديل يتحفظ فوري، الزر هذا للطمأنة فقط
+    toast('تم حفظ اليوم.');
+  });
+
+  exportBtn.addEventListener('click', ()=>{
+    const rows = getDayRows(dayEl.value);
+    const head = ['الاسم','المرتبة','الحضور','الانصراف','الحالة','ملاحظات'];
+    const lines = [head.join(',')];
+    rows.forEach(r=>{
+      const cells = [r.name||'',r.rank||'',r.hudur||'',r.insiraf||'',r.status||'', (r.note||'').replace(/,/g,';')];
+      lines.push(cells.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','));
+    });
+    const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=`attendance_${dayEl.value}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  finalizeBtn.addEventListener('click', ()=>{
+    const finAll = load(FINAL_KEY,'{}');
+    if(finAll[dayEl.value]){
+      toast('تم توجيه هذا اليوم مسبقًا.');
+      return;
+    }
+    // هنا ممكن تستبدلها بإرسال فعلي لـ API
+    finAll[dayEl.value] = {
+      dept: deptEl.value || '',
+      timestamp: new Date().toISOString()
+    };
+    save(FINAL_KEY, finAll);
+    finalizeBtn.disabled = true;
+    toast('تم التوجيه للموارد البشرية 🎯');
+  });
+
+  // دمج السجل الوارد أولاً ثم ارسم
+  mergeIncoming();
+  render();
+})();
+</script>
+</body>
+</html>
