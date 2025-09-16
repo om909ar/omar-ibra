@@ -1,203 +1,229 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>الحضور والانصراف – الموظف</title>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Arial;
-      background:linear-gradient(#8e9a95,#7f8a85);
-      color:#1f2421;
-    }
-    .wrap{max-width:900px;margin:0 auto;padding:20px}
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>الحضور والانصراف – الموظف</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Arial;
+    background:linear-gradient(#8e9a95,#7f8a85);color:#1f2421
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:20px}
 
-    .head{display:flex;justify-content:space-between;align-items:center;gap:12px}
-    .head h1{margin:0;font-size:22px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25)}
-    .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .meta input[type=date]{
-      padding:8px 10px;border:1px solid #d5d8dc;border-radius:999px;background:#e9efe9;
-    }
-    .account b{color:#fff}
+  /* رأس */
+  .head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .head h1{margin:0;font-size:22px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+  .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .meta input[type=date]{
+    padding:8px 10px;border:1px solid #d5d8dc;border-radius:999px;background:#e9efe9;min-width:160px
+  }
 
-    .panel{background:#e9eceb;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:16px;
-      box-shadow:0 4px 0 rgba(0,0,0,.25);margin-top:20px}
+  /* لوحة */
+  .panel{
+    background:#e9eceb;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:16px;
+    box-shadow:0 4px 0 rgba(0,0,0,.25);margin-top:20px
+  }
 
-    .circles-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
-    @media (max-width:640px){.circles-grid{grid-template-columns:1fr}}
+  /* نموذج الموظف */
+  .sub{margin:16px 0 8px;font-size:16px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .row.two > *{flex:1 1 240px}
+  .row.four > *{flex:1 1 160px}
+  label{display:flex;flex-direction:column;gap:6px}
+  input[type=text],input[type=time],select{
+    padding:10px 12px;border:1px solid #cfd6d2;border-radius:8px;background:#fff;min-width:160px
+  }
+  .readonly{background:#f4f6f7}
 
-    .circle-block{background:#edf1ef;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:14px;box-shadow:0 4px 0 rgba(0,0,0,.18)}
-    .circle{aspect-ratio:1/1;border-radius:50%;background:#fff;border:3px solid transparent;
-      display:grid;place-items:center;box-shadow:0 10px 24px rgba(0,0,0,.08);cursor:pointer;user-select:none}
-    .circle.hudur{border-color:#316655}
-    .circle.insiraf{border-color:#2d6a8e}
-    .circle-label{font-weight:700;font-size:20px}
-    .circle-meta{margin-top:10px;font-size:14px}
-    .circle-meta .time{font-weight:700}
-    .circle-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .btn{border:1px solid #c9ced3;background:#eef1f4;border-radius:10px;padding:8px 12px;cursor:pointer;
-      display:inline-flex;align-items:center;gap:6px;font-weight:600}
-    .btn.primary{background:#316655;color:#fff;border-color:#316655}
-    .btn.accent{background:#2d6a8e;color:#fff;border-color:#2d6a8e}
-    .btn.ghost{background:#f4f6f7}
-    .hint{margin-top:12px;font-size:12px;text-align:center}
+  /* أزرار */
+  .btn{border:1px solid #c9ced3;background:#eef1f4;border-radius:10px;padding:10px 14px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;font-weight:600}
+  .btn.primary{background:#316655;color:#fff;border-color:#316655}
+  .btn.accent{background:#2d6a8e;color:#fff;border-color:#2d6a8e}
+  .btn .ic{width:18px;height:18px}
 
-    /* modal */
-    .modal{position:fixed;inset:0;display:none;z-index:9999}
-    .modal[aria-hidden="false"]{display:block}
-    .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
-    .modal-card{position:relative;max-width:420px;width:92%;margin:10vh auto 0;background:#fff;border-radius:12px;
-      box-shadow:0 10px 30px rgba(0,0,0,.25);padding:16px}
-    .modal-card h3{margin:0 0 10px;font-size:18px}
-    .modal-body{display:flex;flex-direction:column;gap:10px}
-    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
-    label{display:flex;flex-direction:column;gap:6px}
-    input[type=text],input[type=time]{padding:8px 10px;border:1px solid #cfd6d2;border-radius:8px}
-    .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;margin:-1px !important;overflow:hidden !important;clip:rect(0 0 0 0)!important}
-  </style>
+  /* سجل */
+  .log{list-style:none;margin:8px 0 0;padding:0}
+  .log li{background:#f9fbfc;border:1px solid #dfe5e2;padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:14px}
+
+  /* توست */
+  .toast{position:fixed;inset-inline:0;bottom:16px;display:flex;justify-content:center;pointer-events:none;z-index:9999}
+  .toast span{background:#111;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;transform:translateY(10px);transition:.2s}
+  .toast.show span{opacity:1;transform:none}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="head">
-      <h1>الحضور والانصراف</h1>
-      <div class="meta">
-        <label>تاريخ اليوم:
-          <input type="date" id="attDate">
-        </label>
-        <div class="account">
-          <div><span>الاسم:</span> <b id="accName">—</b></div>
-          <div><span>المرتبة:</span> <b id="accRank">—</b></div>
-          <button id="editAccount" class="btn ghost sm">تعديل الحساب</button>
-        </div>
-      </div>
-    </header>
-
-    <section class="panel" id="employeePanel">
-      <h2>صفحة الموظف</h2>
-      <div class="circles-grid">
-        <!-- دائرة تحضير -->
-        <div class="circle-block">
-          <div class="circle hudur" id="hudCircle"><div class="circle-label">تحضير</div></div>
-          <div class="circle-meta">آخر تحضير: <span class="time" id="hudTime">—</span></div>
-          <input id="hudPicker" type="time" class="visually-hidden">
-          <div class="circle-actions">
-            <button class="btn primary" id="hudSet">تحديد وقت التحضير</button>
-            <button class="btn ghost" id="hudClear">مسح</button>
-          </div>
-        </div>
-        <!-- دائرة انصراف -->
-        <div class="circle-block">
-          <div class="circle insiraf" id="insCircle"><div class="circle-label">انصراف</div></div>
-          <div class="circle-meta">آخر انصراف: <span class="time" id="insTime">—</span></div>
-          <input id="insPicker" type="time" class="visually-hidden">
-          <div class="circle-actions">
-            <button class="btn accent" id="insSet">تحديد وقت الانصراف</button>
-            <button class="btn ghost" id="insClear">مسح</button>
-          </div>
-        </div>
-      </div>
-      <p class="hint">ملاحظة: يجب اختيار الوقت يدويًا لكل من التحضير والانصراف.</p>
-    </section>
-  </div>
-
-  <!-- مودال تعديل الحساب -->
-  <div id="accountModal" class="modal" aria-hidden="true">
-    <div class="modal-backdrop" data-close></div>
-    <div class="modal-card">
-      <h3>تعديل بيانات الحساب</h3>
-      <div class="modal-body">
-        <label>الاسم <input type="text" id="modalName"></label>
-        <label>المرتبة/الدرجة <input type="text" id="modalRank"></label>
-      </div>
-      <div class="modal-actions">
-        <button class="btn ghost" data-close>إلغاء</button>
-        <button class="btn primary" id="saveAccount">حفظ</button>
-      </div>
+<div class="wrap">
+  <header class="head">
+    <h1>الحضور والانصراف – الموظف</h1>
+    <div class="meta">
+      <label>تاريخ اليوم:
+        <input type="date" id="day">
+      </label>
     </div>
-  </div>
+  </header>
 
-  <script>
-  (function(){
-    const dateInput=document.getElementById('attDate');
-    const accNameEl=document.getElementById('accName');
-    const accRankEl=document.getElementById('accRank');
-    const editBtn=document.getElementById('editAccount');
-    const modal=document.getElementById('accountModal');
-    const modalName=document.getElementById('modalName');
-    const modalRank=document.getElementById('modalRank');
-    const saveBtn=document.getElementById('saveAccount');
+  <section class="panel">
+    <div class="row two">
+      <label>الاسم
+        <input type="text" id="empName" class="readonly" placeholder="اسم الموظف" readonly>
+      </label>
+      <label>المرتبة/الدرجة
+        <input type="text" id="empRank" class="readonly" placeholder="مثال: المرتبة السادسة" readonly>
+      </label>
+    </div>
 
-    const hudCircle=document.getElementById('hudCircle');
-    const hudPicker=document.getElementById('hudPicker');
-    const hudSet=document.getElementById('hudSet');
-    const hudClear=document.getElementById('hudClear');
-    const hudTime=document.getElementById('hudTime');
+    <h3 class="sub">التحضير</h3>
+    <div class="row four">
+      <label>الوقت
+        <input type="time" id="empTime">
+      </label>
 
-    const insCircle=document.getElementById('insCircle');
-    const insPicker=document.getElementById('insPicker');
-    const insSet=document.getElementById('insSet');
-    const insClear=document.getElementById('insClear');
-    const insTime=document.getElementById('insTime');
+      <label>نوع الطلب (اختياري)
+        <select id="empReq">
+          <option value="">— بدون طلب —</option>
+          <option value="partial">استئذان جزئي</option>
+          <option value="full">استئذان كلي</option>
+          <option value="leave">إجازة</option>
+        </select>
+      </label>
 
-    const KEY='attendance_employee_v1';
-    const ACC_KEY='attendance_account';
-    const MANAGER_URL='manager.html';
+      <button id="btnIn" class="btn primary" title="تسجيل حضور">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h11m-3-3l3 3-3 3M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        تسجيل حضور
+      </button>
 
-    const pad=n=>String(n).padStart(2,'0');
-    const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
-    if(!dateInput.value)dateInput.value=todayISO();
+      <button id="btnOut" class="btn" title="تسجيل انصراف">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 12H3m3 3-3-3 3-3M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        تسجيل انصراف
+      </button>
+    </div>
 
-    function loadJSON(k,f){try{return JSON.parse(localStorage.getItem(k)||f);}catch(_){return JSON.parse(f);}}
-    function saveJSON(k,o){localStorage.setItem(k,JSON.stringify(o));}
+    <div class="row" style="margin-top:8px">
+      <button id="btnSend" class="btn accent">إرسال السجل إلى لوحة المدير</button>
+    </div>
 
-    function loadAccount(){
-      const acc=loadJSON(ACC_KEY,'{}');
-      accNameEl.textContent=acc.name||'—';
-      accRankEl.textContent=acc.rank||'—';
+    <div class="list">
+      <h3 class="sub">سجل اليوم</h3>
+      <ul id="empLog" class="log"></ul>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"><span></span></div>
+
+<script>
+(function(){
+  /* ===== مساعدات عامة ===== */
+  const $ = (s,p=document)=>p.querySelector(s);
+  const toast = (msg)=>{ const t=$('#toast'); t.querySelector('span').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); };
+  const pad = n => String(n).padStart(2,'0');
+  const todayISO = ()=>{ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+  const nowHM = ()=>{ const d=new Date(); return d.toTimeString().slice(0,5); };
+  const load = (k, fb)=> { try{return JSON.parse(localStorage.getItem(k) || fb);}catch(_){return JSON.parse(fb);} };
+  const save = (k, obj)=> localStorage.setItem(k, JSON.stringify(obj));
+
+  /* ===== عناصر الصفحة ===== */
+  const dayEl = $('#day');
+  const empName = $('#empName');
+  const empRank = $('#empRank');
+  const empTime = $('#empTime');
+  const empReq  = $('#empReq');
+  const btnIn   = $('#btnIn');
+  const btnOut  = $('#btnOut');
+  const btnSend = $('#btnSend');
+  const empLog  = $('#empLog');
+
+  /* ===== هوية الموظف (URL أو localStorage) ===== */
+  function hydrateIdentity(){
+    const p = new URLSearchParams(location.search);
+    const storedName = localStorage.getItem('accountName') || '';
+    const storedRank = localStorage.getItem('accountRank') || '';
+    const finalName = (p.get('name')||storedName||'').trim();
+    const finalRank = (p.get('rank')||storedRank||'').trim();
+    if(finalName) localStorage.setItem('accountName', finalName);
+    if(finalRank) localStorage.setItem('accountRank', finalRank);
+    empName.value = finalName || '—';
+    empRank.value = finalRank || '—';
+  }
+
+  /* ===== تاريخ افتراضي ===== */
+  const params = new URLSearchParams(location.search);
+  dayEl.value = params.get('date') || todayISO();
+
+  /* ===== سجل اليوم للموظف ===== */
+  function kLog(){ return `empLog:${dayEl.value}`; }
+  function loadLog(){
+    empLog.innerHTML='';
+    const arr = load(kLog(), '[]');
+    arr.forEach(item=>{ const li=document.createElement('li'); li.textContent=item; empLog.appendChild(li); });
+  }
+  function pushLog(text){
+    const arr = load(kLog(), '[]'); arr.push(text); save(kLog(), arr); loadLog();
+  }
+
+  /* ===== إدارة حمولة التحويل للمدير ===== */
+  let selfHudur = ''; let selfInsiraf = '';
+  function reqLabel(v){ return v==='partial'?'استئذان جزئي' : v==='full'?'استئذان كلي' : v==='leave'?'إجازة' : ''; }
+
+  function setPayloadAndOptionallyNavigate(go=false){
+    const payload = {
+      date: dayEl.value,
+      account: { name: empName.value || '', rank: empRank.value || '' },
+      hudur: selfHudur || '',
+      insiraf: selfInsiraf || ''
+    };
+    sessionStorage.setItem('last_attendance_payload', JSON.stringify(payload));
+    if(go){
+      const q = new URLSearchParams({
+        date: dayEl.value,
+        name: empName.value || '',
+        rank: empRank.value || ''
+      }).toString();
+      // نفس مجلد الصفحة
+      location.href = `manager.html?${q}`;
     }
-    loadAccount();
+  }
 
-    function openModal(){const acc=loadJSON(ACC_KEY,'{}');modalName.value=acc.name||'';modalRank.value=acc.rank||'';modal.setAttribute('aria-hidden','false');}
-    function closeModal(){modal.setAttribute('aria-hidden','true');}
-    editBtn.addEventListener('click',openModal);
-    modal.addEventListener('click',e=>{if(e.target.dataset.close!==undefined||e.target.classList.contains('modal-backdrop'))closeModal();});
-    saveBtn.addEventListener('click',()=>{const acc={name:modalName.value.trim(),rank:modalRank.value.trim()};saveJSON(ACC_KEY,acc);loadAccount();closeModal();});
+  /* ===== أحداث الأزرار ===== */
+  btnIn.addEventListener('click', ()=>{
+    const n = (empName.value||'موظف').trim();
+    const r = (empRank.value||'—').trim();
+    const t = empTime.value || nowHM();
+    const extra = reqLabel(empReq.value);
+    selfHudur = t;
+    pushLog(`حضور: ${n} (${r}) عند ${t}${extra?(' — '+extra):''}`);
+    setPayloadAndOptionallyNavigate(false);
+    toast('تم تسجيل الحضور');
+  });
 
-    function loadForDate(iso){
-      const all=loadJSON(KEY,'{}');const rec=all[iso]||{};
-      hudTime.textContent=rec.hudur||'—';
-      insTime.textContent=rec.insiraf||'—';
-      hudPicker.value=rec.hudur||'';insPicker.value=rec.insiraf||'';
-    }
-    loadForDate(dateInput.value);
-    dateInput.addEventListener('change',()=>loadForDate(dateInput.value));
+  btnOut.addEventListener('click', ()=>{
+    const n = (empName.value||'موظف').trim();
+    const r = (empRank.value||'—').trim();
+    const t = empTime.value || nowHM();
+    const extra = reqLabel(empReq.value);
+    selfInsiraf = t;
+    pushLog(`انصراف: ${n} (${r}) عند ${t}${extra?(' — '+extra):''}`);
+    setPayloadAndOptionallyNavigate(false);
+    toast('تم تسجيل الانصراف');
+  });
 
-    function saveTime(iso,key,val){const all=loadJSON(KEY,'{}');const rec=all[iso]||{};rec[key]=val;all[iso]=rec;saveJSON(KEY,all);}
+  btnSend.addEventListener('click', ()=>{
+    setPayloadAndOptionallyNavigate(true); // خزّن واذهب لصفحة المدير
+  });
 
-    function openPicker(input,label){if(input.showPicker){try{input.showPicker();return;}catch(_){}}try{input.click();return;}catch(_){}
-      const cur=input.value||'';const v=prompt("أدخل الوقت HH:MM لـ"+label,cur);if(v&&/^\d{2}:\d{2}$/.test(v)){input.value=v;input.dispatchEvent(new Event('change',{bubbles:true}));}}
-
-    function sendToManager(){
-      const date=dateInput.value;const all=loadJSON(KEY,'{}');const rec=all[date]||{};
-      const payload={date,hudur:rec.hudur||'',insiraf:rec.insiraf||'',account:{name:accNameEl.textContent,rank:accRankEl.textContent}};
-      sessionStorage.setItem('last_attendance_payload',JSON.stringify(payload));
-      window.location.href=MANAGER_URL+"?date="+encodeURIComponent(date);
-    }
-
-    hudCircle.addEventListener('click',()=>openPicker(hudPicker,'التحضير'));
-    hudSet.addEventListener('click',()=>openPicker(hudPicker,'التحضير'));
-    hudClear.addEventListener('click',()=>{saveTime(dateInput.value,'hudur','');hudTime.textContent='—';hudPicker.value='';});
-    hudPicker.addEventListener('change',()=>{const v=hudPicker.value;if(v){saveTime(dateInput.value,'hudur',v);hudTime.textContent=v;sendToManager();}});
-
-    insCircle.addEventListener('click',()=>openPicker(insPicker,'الانصراف'));
-    insSet.addEventListener('click',()=>openPicker(insPicker,'الانصراف'));
-    insClear.addEventListener('click',()=>{saveTime(dateInput.value,'insiraf','');insTime.textContent='—';insPicker.value='';});
-    insPicker.addEventListener('change',()=>{const v=insPicker.value;if(v){saveTime(dateInput.value,'insiraf',v);insTime.textContent=v;/*sendToManager();*/}});
-  })();
-  </script>
+  /* ===== تهيئة ===== */
+  function init(){
+    hydrateIdentity();
+    empTime.value = nowHM();
+    loadLog();
+  }
+  init();
+})();
+</script>
 </body>
 </html>
