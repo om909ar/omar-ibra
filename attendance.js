@@ -1,177 +1,152 @@
-/* أدوات مختصرة */
-const $ = (s, p=document) => p.querySelector(s);
-const $$ = (s, p=document) => Array.from(p.querySelectorAll(s));
+// ===== attendance.js =====
+(function(){
+  // عناصر عامة
+  const dateInput = document.getElementById('attDate');
+  const accNameEl = document.getElementById('accName');
+  const accRankEl = document.getElementById('accRank');
 
-/* عناصر الواجهة */
-const dateEl = $('#attDate');
-const nameEl = $('#empName');
-const rankEl = $('#empRank');
-const timeEl = $('#checkTime');
-const btnIn = $('#btnCheckIn');
-const btnOut = $('#btnCheckOut');
-const reqType = $('#reqType');
-const fromTime = $('#fromTime');
-const toTime = $('#toTime');
-const btnAddReq = $('#btnAddReq');
-const logEl = $('#empLog');
+  // عناصر التحضير
+  const hudCircle = document.getElementById('hudCircle');
+  const hudPicker = document.getElementById('hudPicker');
+  const hudSet    = document.getElementById('hudSet');
+  const hudClear  = document.getElementById('hudClear');
+  const hudTimeEl = document.getElementById('hudTime');
 
-const mgrPanel = $('#managerPanel');
-const tbl = $('#mgrTable tbody');
-const btnAddRow = $('#btnAddRow');
-const btnFinalize = $('#btnFinalize');
-const finalMsg = $('#finalMsg');
-const deptName = $('#deptName');
+  // عناصر الانصراف
+  const insCircle = document.getElementById('insCircle');
+  const insPicker = document.getElementById('insPicker');
+  const insSet    = document.getElementById('insSet');
+  const insClear  = document.getElementById('insClear');
+  const insTimeEl = document.getElementById('insTime');
 
-/* أدوات تاريخ/وقت */
-function todayISO(){
-  const d=new Date();
-  const off = d.getTimezoneOffset();
-  const d2 = new Date(d.getTime()-off*60000);
-  return d2.toISOString().slice(0,10);
-}
-function nowHM(){ const d=new Date(); return d.toTimeString().slice(0,5); }
-function key(prefix){ return `${prefix}:${dateEl.value || todayISO()}`; }
+  // أزرار عامة
+  const sendBtn   = document.getElementById('sendToManager');
+  const resetDay  = document.getElementById('resetDay');
 
-/* قراءة باراميترات الرابط */
-function getParams(){
-  const u = new URL(location.href);
-  const params = Object.fromEntries(u.searchParams.entries());
-  return params;
-}
+  // مفاتيح التخزين
+  const KEY = 'attendance_employee_v1';
+  const ACC_KEY = 'attendance_account';
 
-/* ربط الحساب (اسم/مرتبة) */
-function hydrateAccount(){
-  const p = getParams();
-  const storedName = localStorage.getItem('accountName');
-  const storedRank = localStorage.getItem('accountRank');
+  // أدوات مساعدة
+  const pad = n => String(n).padStart(2,'0');
+  const todayISO = ()=>{
+    const d = new Date();
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  };
 
-  const finalName = p.name?.trim() || storedName || '';
-  const finalRank = p.rank?.trim() || storedRank || '';
+  // تهيئة التاريخ الافتراضي إلى اليوم
+  if (!dateInput.value) dateInput.value = todayISO();
 
-  if (finalName) localStorage.setItem('accountName', finalName);
-  if (finalRank) localStorage.setItem('accountRank', finalRank);
+  // تحميل بيانات الحساب (قراءة فقط الآن)
+  (function loadAccount(){
+    try{
+      const acc = JSON.parse(localStorage.getItem(ACC_KEY) || '{}');
+      accNameEl && (accNameEl.textContent = acc.name || '—');
+      accRankEl && (accRankEl.textContent = acc.rank || '—');
+    }catch(e){}
+  })();
 
-  nameEl.value = finalName || '—';
-  rankEl.value = finalRank || '—';
-  nameEl.readOnly = true;
-  rankEl.readOnly = true;
-}
+  // تحميل أوقات تاريخ محدد
+  function loadForDate(iso){
+    try{
+      const all = JSON.parse(localStorage.getItem(KEY) || '{}');
+      const rec = all[iso] || {};
+      hudTimeEl.textContent = rec.hudur   || '—';
+      insTimeEl.textContent = rec.insiraf || '—';
+      // عكس قيمة المنتقي لتكون ظاهرة عند الفتح التالي (تحسين صغير)
+      hudPicker.value = (rec.hudur   || '');
+      insPicker.value = (rec.insiraf || '');
+    }catch(e){
+      hudTimeEl.textContent = '—';
+      insTimeEl.textContent = '—';
+    }
+  }
 
-/* سجل الموظف */
-function loadEmpLog(){
-  logEl.innerHTML='';
-  const arr = JSON.parse(localStorage.getItem(key('empLog'))||'[]');
-  arr.forEach(item=>{
-    const li = document.createElement('li');
-    li.textContent = item;
-    logEl.appendChild(li);
+  // حفظ وقت معين
+  function saveTime(iso, key, value){
+    const all = JSON.parse(localStorage.getItem(KEY) || '{}');
+    const rec = all[iso] || {};
+    rec[key] = value;
+    all[iso] = rec;
+    localStorage.setItem(KEY, JSON.stringify(all));
+  }
+
+  // فتح منتقي الوقت بشكل آمن
+  function openPicker(input){
+    input.hidden = false;              // للسماح بالتركيز في iOS
+    input.showPicker && input.showPicker();
+    input.focus();
+  }
+
+  // تغيير التاريخ
+  dateInput.addEventListener('change', ()=> loadForDate(dateInput.value));
+  // أول تحميل
+  loadForDate(dateInput.value);
+
+  // أحداث الدائرة/الأزرار (تحضير)
+  hudCircle && hudCircle.addEventListener('click', ()=> openPicker(hudPicker));
+  hudSet && hudSet.addEventListener('click', ()=> openPicker(hudPicker));
+  hudClear && hudClear.addEventListener('click', ()=>{
+    saveTime(dateInput.value, 'hudur', '');
+    hudTimeEl.textContent = '—';
+    hudPicker.value = '';
   });
-}
-function pushEmpLog(text){
-  const k = key('empLog');
-  const arr = JSON.parse(localStorage.getItem(k)||'[]');
-  arr.push(text);
-  localStorage.setItem(k, JSON.stringify(arr));
-  loadEmpLog();
-}
-
-/* وضع المدير */
-function isManager(){
-  const p = getParams();
-  return (p.role || '').toLowerCase() === 'manager';
-}
-function setupRole(){
-  mgrPanel.hidden = !isManager();
-}
-
-/* تهيئة */
-function init(){
-  dateEl.value = todayISO();
-  timeEl.value = nowHM();
-  hydrateAccount();
-  setupRole();
-  loadEmpLog();
-  loadMgrTable();
-}
-
-/* أزرار الموظف */
-btnIn.addEventListener('click', ()=>{
-  const n = nameEl.value.trim()||'موظف';
-  const r = rankEl.value.trim()||'—';
-  const t = timeEl.value || nowHM();
-  pushEmpLog(`حضور: ${n} (${r}) عند ${t}`);
-});
-btnOut.addEventListener('click', ()=>{
-  const n = nameEl.value.trim()||'موظف';
-  const r = rankEl.value.trim()||'—';
-  const t = timeEl.value || nowHM();
-  pushEmpLog(`انصراف: ${n} (${r}) عند ${t}`);
-});
-btnAddReq.addEventListener('click', ()=>{
-  const typeMap = {partial:'استئذان جزئي', full:'استئذان كلي', leave:'إجازة'};
-  const tp = reqType.value;
-  if(!tp){ alert('اختر نوع الطلب'); return; }
-  const f = fromTime.value || '—'; const to = toTime.value || '—';
-  pushEmpLog(`طلب: ${typeMap[tp]} من ${f} إلى ${to}`);
-  reqType.value=''; fromTime.value=''; toTime.value='';
-});
-
-/* تغيير التاريخ */
-dateEl.addEventListener('change', ()=>{
-  loadEmpLog();
-  loadMgrTable();
-});
-
-/* لوحة المدير */
-function loadMgrTable(){
-  const data = JSON.parse(localStorage.getItem(key('mgr'))||'[]');
-  tbl.innerHTML='';
-  data.forEach(row=> addRow(row.name,row.status,row.note,false));
-}
-function getMgrData(){
-  const rows = [];
-  $$('#mgrTable tbody tr').forEach(tr=>{
-    const name = $('input[name="emp"]', tr).value.trim();
-    const status = $('select[name="status"]', tr).value;
-    const note = $('input[name="note"]', tr).value.trim();
-    rows.push({name,status,note});
+  hudPicker && hudPicker.addEventListener('change', ()=>{
+    const v = hudPicker.value; // HH:MM
+    if (v){
+      saveTime(dateInput.value, 'hudur', v);
+      hudTimeEl.textContent = v;
+    }
   });
-  return rows;
-}
-function saveMgr(){
-  localStorage.setItem(key('mgr'), JSON.stringify(getMgrData()));
-}
-function addRow(name='',status='present',note='',save=true){
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td><input name="emp" placeholder="اسم الموظف" value="${name}"></td>
-    <td>
-      <select name="status">
-        <option value="present" ${status==='present'?'selected':''}>حاضر</option>
-        <option value="absent" ${status==='absent'?'selected':''}>غائب</option>
-        <option value="leave" ${status==='leave'?'selected':''}>إجازة</option>
-        <option value="partial" ${status==='partial'?'selected':''}>استئذان جزئي</option>
-        <option value="full" ${status==='full'?'selected':''}>استئذان كلي</option>
-      </select>
-    </td>
-    <td><input name="note" placeholder="ملاحظة" value="${note}"></td>
-  `;
-  tr.addEventListener('input', saveMgr);
-  tbl.appendChild(tr);
-  if(save) saveMgr();
-}
-btnAddRow.addEventListener('click', ()=> addRow());
-btnFinalize.addEventListener('click', ()=>{
-  const rows = getMgrData();
-  if(!rows.length){ alert('أضف موظف واحد على الأقل'); return; }
-  saveMgr();
-  const d = dateEl.value;
-  const dept = deptName.value || '—';
-  finalMsg.innerHTML = `تم توجيه الحضور بتاريخ <b>${d}</b> لإدارة الموارد البشرية (${dept}).<br>
-  إجمالي الموظفين: ${rows.length}.`;
-  finalMsg.hidden = false;
-  setTimeout(()=> finalMsg.hidden = true, 5000);
-});
 
-/* ابدأ */
-document.addEventListener('DOMContentLoaded', init);
+  // أحداث الدائرة/الأزرار (انصراف)
+  insCircle && insCircle.addEventListener('click', ()=> openPicker(insPicker));
+  insSet && insSet.addEventListener('click', ()=> openPicker(insPicker));
+  insClear && insClear.addEventListener('click', ()=>{
+    saveTime(dateInput.value, 'insiraf', '');
+    insTimeEl.textContent = '—';
+    insPicker.value = '';
+  });
+  insPicker && insPicker.addEventListener('change', ()=>{
+    const v = insPicker.value;
+    if (v){
+      saveTime(dateInput.value, 'insiraf', v);
+      insTimeEl.textContent = v;
+    }
+  });
+
+  // إعادة تعيين اليوم الحالي (مسح تحضير/انصراف لليوم فقط)
+  resetDay && resetDay.addEventListener('click', ()=>{
+    const all = JSON.parse(localStorage.getItem(KEY) || '{}');
+    if (all[dateInput.value]){
+      all[dateInput.value].hudur = '';
+      all[dateInput.value].insiraf = '';
+      localStorage.setItem(KEY, JSON.stringify(all));
+    }
+    hudTimeEl.textContent = '—';
+    insTimeEl.textContent = '—';
+    hudPicker.value = '';
+    insPicker.value = '';
+  });
+
+  // إرسال لصفحة المدير (تقدر تغيّر المسار)
+  sendBtn && sendBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    // بإمكانك هنا لاحقًا ترسل عبر fetch إلى API
+    const date = dateInput.value;
+    const all  = JSON.parse(localStorage.getItem(KEY) || '{}');
+    const rec  = all[date] || {};
+    const payload = {
+      date,
+      hudur: rec.hudur || '',
+      insiraf: rec.insiraf || '',
+      account: {
+        name: accNameEl ? accNameEl.textContent : '',
+        rank: accRankEl ? accRankEl.textContent : ''
+      }
+    };
+    // مؤقتًا: نفتح صفحة المدير ونمرر التاريخ (وبإمكانك حفظ payload في localStorage/Session)
+    sessionStorage.setItem('last_attendance_payload', JSON.stringify(payload));
+    window.location.href = `/manager?date=${encodeURIComponent(date)}`;
+  });
+})();
