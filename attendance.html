@@ -5,13 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>الحضور والانصراف – الموظف</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- نفس ملفك السابق للألوان والتنسيق -->
-  <link rel="stylesheet" href="attendance.css">
+  <style>
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Arial;
+      background:linear-gradient(#8e9a95,#7f8a85);
+      color:#1f2421;
+    }
+    .wrap{max-width:900px;margin:0 auto;padding:20px}
+
+    .head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .head h1{margin:0;font-size:22px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+    .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .meta input[type=date]{
+      padding:8px 10px;border:1px solid #d5d8dc;border-radius:999px;background:#e9efe9;
+    }
+    .account b{color:#fff}
+
+    .panel{background:#e9eceb;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:16px;
+      box-shadow:0 4px 0 rgba(0,0,0,.25);margin-top:20px}
+
+    .circles-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+    @media (max-width:640px){.circles-grid{grid-template-columns:1fr}}
+
+    .circle-block{background:#edf1ef;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:14px;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+    .circle{aspect-ratio:1/1;border-radius:50%;background:#fff;border:3px solid transparent;
+      display:grid;place-items:center;box-shadow:0 10px 24px rgba(0,0,0,.08);cursor:pointer;user-select:none}
+    .circle.hudur{border-color:#316655}
+    .circle.insiraf{border-color:#2d6a8e}
+    .circle-label{font-weight:700;font-size:20px}
+    .circle-meta{margin-top:10px;font-size:14px}
+    .circle-meta .time{font-weight:700}
+    .circle-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{border:1px solid #c9ced3;background:#eef1f4;border-radius:10px;padding:8px 12px;cursor:pointer;
+      display:inline-flex;align-items:center;gap:6px;font-weight:600}
+    .btn.primary{background:#316655;color:#fff;border-color:#316655}
+    .btn.accent{background:#2d6a8e;color:#fff;border-color:#2d6a8e}
+    .btn.ghost{background:#f4f6f7}
+    .hint{margin-top:12px;font-size:12px;text-align:center}
+
+    /* modal */
+    .modal{position:fixed;inset:0;display:none;z-index:9999}
+    .modal[aria-hidden="false"]{display:block}
+    .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+    .modal-card{position:relative;max-width:420px;width:92%;margin:10vh auto 0;background:#fff;border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);padding:16px}
+    .modal-card h3{margin:0 0 10px;font-size:18px}
+    .modal-body{display:flex;flex-direction:column;gap:10px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+    label{display:flex;flex-direction:column;gap:6px}
+    input[type=text],input[type=time]{padding:8px 10px;border:1px solid #cfd6d2;border-radius:8px}
+    .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;margin:-1px !important;overflow:hidden !important;clip:rect(0 0 0 0)!important}
+  </style>
 </head>
 <body>
   <div class="wrap">
-
-    <!-- رأس الصفحة: التاريخ + معلومات الحساب (قراءة فقط) -->
     <header class="head">
       <h1>الحضور والانصراف</h1>
       <div class="meta">
@@ -19,71 +69,135 @@
           <input type="date" id="attDate">
         </label>
         <div class="account">
-          <div class="acc-line"><span class="tag">الاسم:</span> <b id="accName">—</b></div>
-          <div class="acc-line"><span class="tag">المرتبة:</span> <b id="accRank">—</b></div>
-          <button id="editAccount" class="btn ghost sm" title="تعديل بيانات الحساب">تعديل الحساب</button>
+          <div><span>الاسم:</span> <b id="accName">—</b></div>
+          <div><span>المرتبة:</span> <b id="accRank">—</b></div>
+          <button id="editAccount" class="btn ghost sm">تعديل الحساب</button>
         </div>
       </div>
     </header>
 
-    <!-- ===== صفحة الموظف المبسطة ===== -->
-    <main class="layout">
-
-      <!-- لوحة الموظف فقط (بدون أي أدوات مدير أو طلبات) -->
-      <section class="panel center" id="employeePanel">
-        <h2 class="panel-title">صفحة الموظف</h2>
-
-        <!-- شبكة الدائرتين في منتصف الصفحة -->
-        <div class="circles-grid" aria-label="أزرار التحضير والانصراف">
-          <!-- دائرة تحضير -->
-          <div class="circle-block">
-            <div class="circle hudur" id="hudCircle" tabindex="0" role="button" aria-label="اختيار وقت التحضير">
-              <div class="circle-label">تحضير</div>
-            </div>
-            <div class="circle-meta">
-              آخر تحضير: <span class="time" id="hudTime">—</span>
-            </div>
-            <!-- منتقي الوقت اليدوي للتحضير (نفتحه بالضغط على الدائرة أو الزر) -->
-            <input id="hudPicker" type="time" hidden>
-            <div class="circle-actions">
-              <button class="btn primary" id="hudSet">تحديد وقت التحضير يدويًا</button>
-              <button class="btn ghost" id="hudClear">مسح</button>
-            </div>
-          </div>
-
-          <!-- دائرة انصراف -->
-          <div class="circle-block">
-            <div class="circle insiraf" id="insCircle" tabindex="0" role="button" aria-label="اختيار وقت الانصراف">
-              <div class="circle-label">انصراف</div>
-            </div>
-            <div class="circle-meta">
-              آخر انصراف: <span class="time" id="insTime">—</span>
-            </div>
-            <!-- منتقي الوقت اليدوي للانصراف -->
-            <input id="insPicker" type="time" hidden>
-            <div class="circle-actions">
-              <button class="btn accent" id="insSet">تحديد وقت الانصراف يدويًا</button>
-              <button class="btn ghost" id="insClear">مسح</button>
-            </div>
+    <section class="panel" id="employeePanel">
+      <h2>صفحة الموظف</h2>
+      <div class="circles-grid">
+        <!-- دائرة تحضير -->
+        <div class="circle-block">
+          <div class="circle hudur" id="hudCircle"><div class="circle-label">تحضير</div></div>
+          <div class="circle-meta">آخر تحضير: <span class="time" id="hudTime">—</span></div>
+          <input id="hudPicker" type="time" class="visually-hidden">
+          <div class="circle-actions">
+            <button class="btn primary" id="hudSet">تحديد وقت التحضير</button>
+            <button class="btn ghost" id="hudClear">مسح</button>
           </div>
         </div>
-
-        <!-- أزرار عامة أسفل الدائرتين -->
-        <div class="actions">
-          <!-- لاحقًا بالـJS بنخليه يرسل للمدير / يفتح صفحة المدير مع التاريخ -->
-          <a id="sendToManager" class="btn" href="#" aria-label="إرسال الحضور لصفحة المدير">إرسال لصفحة المدير</a>
-          <button id="resetDay" class="btn ghost">إعادة تعيين اليوم</button>
+        <!-- دائرة انصراف -->
+        <div class="circle-block">
+          <div class="circle insiraf" id="insCircle"><div class="circle-label">انصراف</div></div>
+          <div class="circle-meta">آخر انصراف: <span class="time" id="insTime">—</span></div>
+          <input id="insPicker" type="time" class="visually-hidden">
+          <div class="circle-actions">
+            <button class="btn accent" id="insSet">تحديد وقت الانصراف</button>
+            <button class="btn ghost" id="insClear">مسح</button>
+          </div>
         </div>
-
-        <p class="hint">
-          ملاحظة: لا يتم أخذ “الوقت الآن” تلقائيًا. يجب اختيار الوقت يدويًا لكل من التحضير والانصراف.
-        </p>
-      </section>
-
-    </main>
+      </div>
+      <p class="hint">ملاحظة: يجب اختيار الوقت يدويًا لكل من التحضير والانصراف.</p>
+    </section>
   </div>
 
-  <!-- سنضيف attendance.js المعدّل في الخطوة التالية لبرمجة السلوك -->
-  <!-- <script src="attendance.js"></script> -->
+  <!-- مودال تعديل الحساب -->
+  <div id="accountModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card">
+      <h3>تعديل بيانات الحساب</h3>
+      <div class="modal-body">
+        <label>الاسم <input type="text" id="modalName"></label>
+        <label>المرتبة/الدرجة <input type="text" id="modalRank"></label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>إلغاء</button>
+        <button class="btn primary" id="saveAccount">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const dateInput=document.getElementById('attDate');
+    const accNameEl=document.getElementById('accName');
+    const accRankEl=document.getElementById('accRank');
+    const editBtn=document.getElementById('editAccount');
+    const modal=document.getElementById('accountModal');
+    const modalName=document.getElementById('modalName');
+    const modalRank=document.getElementById('modalRank');
+    const saveBtn=document.getElementById('saveAccount');
+
+    const hudCircle=document.getElementById('hudCircle');
+    const hudPicker=document.getElementById('hudPicker');
+    const hudSet=document.getElementById('hudSet');
+    const hudClear=document.getElementById('hudClear');
+    const hudTime=document.getElementById('hudTime');
+
+    const insCircle=document.getElementById('insCircle');
+    const insPicker=document.getElementById('insPicker');
+    const insSet=document.getElementById('insSet');
+    const insClear=document.getElementById('insClear');
+    const insTime=document.getElementById('insTime');
+
+    const KEY='attendance_employee_v1';
+    const ACC_KEY='attendance_account';
+    const MANAGER_URL='manager.html';
+
+    const pad=n=>String(n).padStart(2,'0');
+    const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+    if(!dateInput.value)dateInput.value=todayISO();
+
+    function loadJSON(k,f){try{return JSON.parse(localStorage.getItem(k)||f);}catch(_){return JSON.parse(f);}}
+    function saveJSON(k,o){localStorage.setItem(k,JSON.stringify(o));}
+
+    function loadAccount(){
+      const acc=loadJSON(ACC_KEY,'{}');
+      accNameEl.textContent=acc.name||'—';
+      accRankEl.textContent=acc.rank||'—';
+    }
+    loadAccount();
+
+    function openModal(){const acc=loadJSON(ACC_KEY,'{}');modalName.value=acc.name||'';modalRank.value=acc.rank||'';modal.setAttribute('aria-hidden','false');}
+    function closeModal(){modal.setAttribute('aria-hidden','true');}
+    editBtn.addEventListener('click',openModal);
+    modal.addEventListener('click',e=>{if(e.target.dataset.close!==undefined||e.target.classList.contains('modal-backdrop'))closeModal();});
+    saveBtn.addEventListener('click',()=>{const acc={name:modalName.value.trim(),rank:modalRank.value.trim()};saveJSON(ACC_KEY,acc);loadAccount();closeModal();});
+
+    function loadForDate(iso){
+      const all=loadJSON(KEY,'{}');const rec=all[iso]||{};
+      hudTime.textContent=rec.hudur||'—';
+      insTime.textContent=rec.insiraf||'—';
+      hudPicker.value=rec.hudur||'';insPicker.value=rec.insiraf||'';
+    }
+    loadForDate(dateInput.value);
+    dateInput.addEventListener('change',()=>loadForDate(dateInput.value));
+
+    function saveTime(iso,key,val){const all=loadJSON(KEY,'{}');const rec=all[iso]||{};rec[key]=val;all[iso]=rec;saveJSON(KEY,all);}
+
+    function openPicker(input,label){if(input.showPicker){try{input.showPicker();return;}catch(_){}}try{input.click();return;}catch(_){}
+      const cur=input.value||'';const v=prompt("أدخل الوقت HH:MM لـ"+label,cur);if(v&&/^\d{2}:\d{2}$/.test(v)){input.value=v;input.dispatchEvent(new Event('change',{bubbles:true}));}}
+
+    function sendToManager(){
+      const date=dateInput.value;const all=loadJSON(KEY,'{}');const rec=all[date]||{};
+      const payload={date,hudur:rec.hudur||'',insiraf:rec.insiraf||'',account:{name:accNameEl.textContent,rank:accRankEl.textContent}};
+      sessionStorage.setItem('last_attendance_payload',JSON.stringify(payload));
+      window.location.href=MANAGER_URL+"?date="+encodeURIComponent(date);
+    }
+
+    hudCircle.addEventListener('click',()=>openPicker(hudPicker,'التحضير'));
+    hudSet.addEventListener('click',()=>openPicker(hudPicker,'التحضير'));
+    hudClear.addEventListener('click',()=>{saveTime(dateInput.value,'hudur','');hudTime.textContent='—';hudPicker.value='';});
+    hudPicker.addEventListener('change',()=>{const v=hudPicker.value;if(v){saveTime(dateInput.value,'hudur',v);hudTime.textContent=v;sendToManager();}});
+
+    insCircle.addEventListener('click',()=>openPicker(insPicker,'الانصراف'));
+    insSet.addEventListener('click',()=>openPicker(insPicker,'الانصراف'));
+    insClear.addEventListener('click',()=>{saveTime(dateInput.value,'insiraf','');insTime.textContent='—';insPicker.value='';});
+    insPicker.addEventListener('change',()=>{const v=insPicker.value;if(v){saveTime(dateInput.value,'insiraf',v);insTime.textContent=v;/*sendToManager();*/}});
+  })();
+  </script>
 </body>
 </html>
