@@ -1,30 +1,62 @@
-/* ====== دوائر التحضير/الانصراف (صفحة الموظف) ====== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Arial;
+  background:linear-gradient(#8e9a95,#7f8a85);
+  color:#1f2421;
+}
+.wrap{max-width:1200px;margin:0 auto;padding:20px}
 
-/* نخلي التخطيط عمود واحد في صفحة الموظف */
-.layout{
-  display:block;
-  margin-top:16px;
+/* رأس الصفحة */
+.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.head h1{margin:0;font-size:22px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.meta input[type=date]{
+  padding:8px 10px;border:1px solid #d5d8dc;border-radius:999px;background:#e9efe9;
+}
+.account b{color:#fff}
+
+/* البانل العام */
+.panel{
+  background:#e9eceb;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:16px 14px;
+  box-shadow:0 4px 0 rgba(0,0,0,.25);margin-top:20px
+}
+.panel-title{margin:0 0 10px;font-size:18px}
+
+/* عناوين فرعية */
+.sub{margin:16px 0 8px;font-size:16px}
+
+/* صفوف الإدخال */
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label{display:flex;flex-direction:column;gap:6px}
+input[type=text],input[type=time],select{
+  padding:10px 12px;border:1px solid #cfd6d2;border-radius:8px;background:#fff;min-width:160px
 }
 
-/* لو عندك panel للموظف في الوسط، ثبته بعرض مريح */
-#employeePanel{
-  max-width:720px;
-  margin:0 auto;
+/* أزرار */
+.btn{
+  border:1px solid #c9ced3;background:#eef1f4;border-radius:10px;padding:8px 12px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;font-weight:600
 }
+.btn.primary{background:#316655;color:#fff;border-color:#316655}
+.btn.accent{background:#2d6a8e;color:#fff;border-color:#2d6a8e}
+.btn.ghost{background:#f4f6f7}
 
-/* شبكة الدائرتين */
+/* ملاحظات */
+.hint{font-size:12px;color:#2b3330;text-align:center;margin-top:12px}
+
+/* ===== الدائرتين ===== */
 .circles-grid{
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:1fr 1fr;
   gap:16px;
-  align-items:start;
-  margin-top:12px;
+  margin-top:20px;
 }
 @media (max-width:640px){
-  .circles-grid{ grid-template-columns:1fr; }
+  .circles-grid{grid-template-columns:1fr}
 }
 
-/* كتلة الدائرة */
 .circle-block{
   background:#edf1ef;
   border:1px solid rgba(0,0,0,.08);
@@ -33,7 +65,6 @@
   box-shadow:0 4px 0 rgba(0,0,0,.18);
 }
 
-/* الدائرة نفسها */
 .circle{
   aspect-ratio:1/1;
   border-radius:50%;
@@ -46,52 +77,33 @@
   user-select:none;
   transition:transform .06s ease, border-color .2s ease;
 }
-.circle:active{ transform:scale(.985); }
-.circle:focus-visible{ outline:3px solid rgba(0,0,0,.15); outline-offset:4px; }
+.circle:active{transform:scale(.97)}
+.circle.hudur{border-color:#316655}
+.circle.insiraf{border-color:#2d6a8e}
 
-/* ألوان خاصة بكل دائرة */
-.circle.hudur{ border-color:#316655; }
-.circle.insiraf{ border-color:#2d6a8e; }
+.circle-label{font-weight:700;font-size:20px}
+.circle-meta{margin-top:10px;font-size:14px}
+.circle-meta .time{font-weight:700}
+.circle-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 
-/* نص داخل الدائرة */
-.circle-label{
-  font-weight:700;
-  font-size:20px;
-  color:#1f2421;
+/* ===== Modal تعديل الحساب ===== */
+.modal{position:fixed;inset:0;display:none;z-index:9999}
+.modal[aria-hidden="false"]{display:block}
+.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.modal-card{
+  position:relative;max-width:420px;width:92%;margin:10vh auto 0;background:#fff;
+  border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:16px
 }
+.modal-card h3{margin:0 0 10px;font-size:18px}
+.modal-body{display:flex;flex-direction:column;gap:10px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
 
-/* معلومات الوقت أسفل الدائرة */
-.circle-meta{
-  margin-top:10px;
-  font-size:14px;
-  color:#2b3330;
+/* لإخفاء منتقي الوقت بصريًا لكن يظل يشتغل */
+.visually-hidden{
+  position:absolute !important;
+  width:1px !important;
+  height:1px !important;
+  margin:-1px !important;
+  overflow:hidden !important;
+  clip:rect(0 0 0 0)!important
 }
-.circle-meta .time{ font-weight:700; color:#1f2421; }
-
-/* أزرار خاصة بكل دائرة */
-.circle-actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:12px;
-}
-.btn.accent{ background:#2d6a8e; color:#fff; border-color:#2d6a8e; }
-
-/* الأزرار العامة أسفل الدائرتين */
-.actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:18px;
-  justify-content:center;
-}
-
-/* ملاحظة */
-.hint{
-  margin-top:8px;
-  text-align:center;
-  color:#2b3330;
-}
-
-/* تحسين رأس الصفحة على الخلفية الداكنة */
-.head .meta .account b{ color:#fff; }
