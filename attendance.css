@@ -1,87 +1,97 @@
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:'Tajawal',system-ui,-apple-system,Segoe UI,Arial;
-  background:#8c9a95; /* مطابق للهوم */
-  background:linear-gradient(#8e9a95,#7f8a85);
+/* ====== دوائر التحضير/الانصراف (صفحة الموظف) ====== */
+
+/* نخلي التخطيط عمود واحد في صفحة الموظف */
+.layout{
+  display:block;
+  margin-top:16px;
+}
+
+/* لو عندك panel للموظف في الوسط، ثبته بعرض مريح */
+#employeePanel{
+  max-width:720px;
+  margin:0 auto;
+}
+
+/* شبكة الدائرتين */
+.circles-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+  align-items:start;
+  margin-top:12px;
+}
+@media (max-width:640px){
+  .circles-grid{ grid-template-columns:1fr; }
+}
+
+/* كتلة الدائرة */
+.circle-block{
+  background:#edf1ef;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 4px 0 rgba(0,0,0,.18);
+}
+
+/* الدائرة نفسها */
+.circle{
+  aspect-ratio:1/1;
+  border-radius:50%;
+  background:#fff;
+  border:3px solid transparent;
+  display:grid;
+  place-items:center;
+  box-shadow:0 10px 24px rgba(0,0,0,.08);
+  cursor:pointer;
+  user-select:none;
+  transition:transform .06s ease, border-color .2s ease;
+}
+.circle:active{ transform:scale(.985); }
+.circle:focus-visible{ outline:3px solid rgba(0,0,0,.15); outline-offset:4px; }
+
+/* ألوان خاصة بكل دائرة */
+.circle.hudur{ border-color:#316655; }
+.circle.insiraf{ border-color:#2d6a8e; }
+
+/* نص داخل الدائرة */
+.circle-label{
+  font-weight:700;
+  font-size:20px;
   color:#1f2421;
 }
-.wrap{max-width:1200px;margin:0 auto;padding:20px}
 
-/* رأس الصفحة */
-.head{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.head h1{margin:0;font-size:22px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25)}
-.meta{display:flex;align-items:center;gap:10px}
-.meta input[type=date]{
-  padding:8px 10px;border:1px solid #d5d8dc;border-radius:999px;background:#e9efe9;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15), 0 2px 0 rgba(0,0,0,.15)
+/* معلومات الوقت أسفل الدائرة */
+.circle-meta{
+  margin-top:10px;
+  font-size:14px;
+  color:#2b3330;
+}
+.circle-meta .time{ font-weight:700; color:#1f2421; }
+
+/* أزرار خاصة بكل دائرة */
+.circle-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+.btn.accent{ background:#2d6a8e; color:#fff; border-color:#2d6a8e; }
+
+/* الأزرار العامة أسفل الدائرتين */
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+  justify-content:center;
 }
 
-/* تخطيط: الموظف بالوسط، المدير يمين */
-.layout{
-  display:grid;
-  grid-template-columns: 1fr 360px;
-  gap:18px;
-  align-items:start;
-  margin-top:16px
+/* ملاحظة */
+.hint{
+  margin-top:8px;
+  text-align:center;
+  color:#2b3330;
 }
 
-/* بطاقات */
-.panel,.side{
-  background:#e9eceb;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:16px 14px;
-  box-shadow:0 4px 0 rgba(0,0,0,.25)
-}
-.panel-title{margin:0 0 10px;font-size:18px}
-
-.panel-center{ /* عرض ثابت ومتمركز */
-  max-width:670px; margin:0 auto;
-}
-
-/* عناوين فرعية */
-.sub{margin:16px 0 8px;font-size:16px}
-
-/* صفوف الإدخال */
-.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.row.two > *{flex:1 1 240px}
-.row.three > *{flex:1 1 180px}
-.row.four > *{flex:1 1 160px}
-
-label{display:flex;flex-direction:column;gap:6px}
-input[type=text],input[type=time],select{
-  padding:10px 12px;border:1px solid #cfd6d2;border-radius:8px;background:#fff;min-width:160px
-}
-
-/* أزرار */
-.btn{
-  border:1px solid #c9ced3;background:#eef1f4;border-radius:10px;padding:10px 14px;cursor:pointer;
-  display:inline-flex;align-items:center;gap:8px;font-weight:600
-}
-.btn .ic{width:18px;height:18px}
-.btn.primary{background:#316655;color:#fff;border-color:#316655}
-.btn.ghost{background:#f4f6f7}
-
-/* تلميح */
-.hint{font-size:12px;color:#2b3330}
-
-/* جدول المدير */
-.tbl{width:100%;border-collapse:separate;border-spacing:0 8px}
-.tbl th{font-size:13px;text-align:right;color:#2b3330;padding:6px 4px}
-.tbl td{background:#f9fbfc;border:1px solid #dfe5e2;padding:10px;border-radius:8px}
-.tbl select,.tbl input{width:100%}
-
-/* سجل الموظف */
-.log{list-style:none;margin:8px 0 0;padding:0}
-.log li{background:#f9fbfc;border:1px solid #dfe5e2;padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:14px}
-
-/* رسالة نهائية */
-.final{margin-top:10px;background:#e8f5e9;border:1px solid #b2dfdb;padding:10px 12px;border-radius:10px}
-
-/* تجاوب */
-@media (max-width:1100px){
-  .layout{grid-template-columns: 1fr 340px}
-}
-@media (max-width:980px){
-  .layout{grid-template-columns:1fr}
-  .side{order:-1}
-}
+/* تحسين رأس الصفحة على الخلفية الداكنة */
+.head .meta .account b{ color:#fff; }
