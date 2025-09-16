@@ -22,6 +22,24 @@
     padding:8px 10px;border:1px solid #d5d8dc;border-radius:999px;background:#e9efe9;min-width:160px
   }
 
+  /* تبويبات */
+  .tabs{
+    display:flex; gap:8px; justify-content:center; align-items:center;
+    margin:14px auto 10px; padding:6px;
+    background:#e9efe9; border-radius:999px;
+    width:min(980px,94%); box-shadow:0 2px 0 rgba(0,0,0,.2) inset;
+  }
+  .tab{
+    border:0; cursor:pointer; padding:10px 16px; border-radius:999px;
+    background:#445a53; color:#e7efe9; font-weight:600;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.15), 0 2px 0 rgba(0,0,0,.2);
+  }
+  .tab.is-active{ background:#316655; color:#fff }
+
+  .tabs-content{ width:min(1100px,94%); margin:0 auto }
+  .tab-panel{ display:none }
+  .tab-panel.is-active{ display:block }
+
   /* لوحة */
   .panel{
     background:#e9eceb;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:16px;
@@ -52,10 +70,30 @@
   .sum{margin-top:10px;font-size:14px;color:#2b3330}
   .hint{font-size:12px;color:#2b3330;margin-top:10px}
 
+  /* نموذج المدير الشخصي */
+  .sub{margin:16px 0 8px;font-size:16px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .row.two > *{flex:1 1 240px}
+  .row.four > *{flex:1 1 160px}
+  label{display:flex;flex-direction:column;gap:6px}
+  input[type=text],input[type=time],select{
+    padding:10px 12px;border:1px solid #cfd6d2;border-radius:8px;background:#fff;min-width:160px
+  }
+  .btn .ic{width:18px;height:18px}
+  .log{list-style:none;margin:8px 0 0;padding:0}
+  .log li{background:#f9fbfc;border:1px solid #dfe5e2;padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:14px}
+
   /* توست */
   .toast{position:fixed;inset-inline:0;bottom:16px;display:flex;justify-content:center;pointer-events:none;z-index:9999}
   .toast span{background:#111;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;transform:translateY(10px);transition:.2s}
   .toast.show span{opacity:1;transform:none}
+
+  /* تلوين اختياري حسب الحالة */
+  .row-present{outline:2px solid #2e7d32}
+  .row-late{outline:2px solid #ff8f00}
+  .row-absent{outline:2px solid #c62828}
+  .row-leave{outline:2px solid #1565c0}
+  .row-permit{outline:2px solid #6a1b9a}
 </style>
 </head>
 <body>
@@ -72,77 +110,149 @@
     </div>
   </header>
 
-  <section class="panel">
-    <div class="toolbar">
-      <button id="addRow" class="btn ghost">إضافة موظف</button>
-      <button id="saveDay" class="btn primary">حفظ اليوم</button>
-      <button id="exportCSV" class="btn accent">تصدير CSV</button>
-      <button id="finalize" class="btn warn">توجيه للموارد البشرية</button>
-      <input id="search" class="search" type="text" placeholder="بحث بالاسم…">
-    </div>
+  <!-- التبويبات -->
+  <nav class="tabs" role="tablist" aria-label="مدير">
+    <button class="tab is-active" role="tab" aria-selected="true" data-tab="dept">تحضير الإدارة</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="mgr">حضور المدير</button>
+  </nav>
 
-    <div class="table-wrap">
-      <table id="tbl" aria-label="سجل اليوم">
-        <thead>
-          <tr>
-            <th style="width:22%">الموظف</th>
-            <th style="width:12%">المرتبة</th>
-            <th style="width:12%">الحضور</th>
-            <th style="width:12%">الانصراف</th>
-            <th style="width:14%">الحالة</th>
-            <th>ملاحظات</th>
-            <th style="width:10%">إجراءات</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div id="empty" class="empty" hidden>لا يوجد سجلات لهذا اليوم.</div>
-    </div>
+  <main class="tabs-content">
+    <!-- تبويب: تحضير الإدارة -->
+    <section id="tab-dept" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-dept">
+      <section class="panel">
+        <div class="toolbar">
+          <button id="addRow" class="btn ghost">إضافة موظف</button>
+          <button id="saveDay" class="btn primary">حفظ اليوم</button>
+          <button id="exportCSV" class="btn accent">تصدير CSV</button>
+          <button id="finalize" class="btn warn">توجيه للموارد البشرية</button>
+          <input id="search" class="search" type="text" placeholder="بحث بالاسم…">
+        </div>
 
-    <div id="summary" class="sum">الإجمالي: 0 | حاضر: 0 | متأخر: 0 | غياب: 0 | إجازة: 0 | استئذان: 0</div>
-    <div class="hint">ملاحظة: إذا وصلت الصفحة عبر تحويل من صفحة الموظف، سيتم دمج السجل المرسل تلقائيًا لهذا التاريخ.</div>
-  </section>
+        <div class="table-wrap">
+          <table id="tbl" aria-label="سجل اليوم">
+            <thead>
+              <tr>
+                <th style="width:22%">الموظف</th>
+                <th style="width:12%">المرتبة</th>
+                <th style="width:12%">الحضور</th>
+                <th style="width:12%">الانصراف</th>
+                <th style="width:14%">الحالة</th>
+                <th>ملاحظات</th>
+                <th style="width:10%">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div id="empty" class="empty" hidden>لا يوجد سجلات لهذا اليوم.</div>
+        </div>
+
+        <div id="summary" class="sum">الإجمالي: 0 | حاضر: 0 | متأخر: 0 | غياب: 0 | إجازة: 0 | استئذان: 0</div>
+        <div class="hint">ملاحظة: إذا وصلت الصفحة عبر تحويل من صفحة الموظف، سيتم دمج السجل المرسل تلقائيًا لهذا التاريخ.</div>
+      </section>
+    </section>
+
+    <!-- تبويب: حضور المدير (نفس تحضير الموظفين) -->
+    <section id="tab-mgr" class="tab-panel" role="tabpanel" aria-labelledby="tab-mgr">
+      <section class="panel">
+        <h2 style="margin:0 0 10px;font-size:18px">حضور المدير (شخصي)</h2>
+
+        <div class="row two">
+          <label>الاسم
+            <input type="text" id="mgrSelfName" placeholder="اسم المدير">
+          </label>
+          <label>المرتبة/الدرجة
+            <input type="text" id="mgrSelfRank" placeholder="مثال: مدير إدارة / المرتبة العاشرة">
+          </label>
+        </div>
+
+        <h3 class="sub">التحضير</h3>
+        <div class="row four">
+          <label>الوقت
+            <input type="time" id="mgrSelfTime">
+          </label>
+
+          <label>نوع الطلب (اختياري)
+            <select id="mgrSelfReq">
+              <option value="">— بدون طلب —</option>
+              <option value="partial">استئذان جزئي</option>
+              <option value="full">استئذان كلي</option>
+              <option value="leave">إجازة</option>
+            </select>
+          </label>
+
+          <button id="mgrSelfIn" class="btn primary">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h11m-3-3l3 3-3 3M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            تسجيل حضور
+          </button>
+
+          <button id="mgrSelfOut" class="btn">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 12H3m3 3-3-3 3-3M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            تسجيل انصراف
+          </button>
+        </div>
+
+        <div class="list">
+          <h3 class="sub">سجل اليوم</h3>
+          <ul id="mgrSelfLog" class="log"></ul>
+        </div>
+      </section>
+    </section>
+  </main>
 </div>
 
 <div class="toast" id="toast"><span></span></div>
 
 <script>
 (function(){
-  // مفاتيح التخزين
-  const MGR_KEY = 'mgr_records_v1';      // سجلات المدير: { 'YYYY-MM-DD': [rows] }
-  const DEPT_KEY = 'mgr_dept';           // اسم الإدارة الافتراضي
-  const FINAL_KEY = 'mgr_finalized_v1';  // حالات التوجيه HR لكل يوم
+  /* ===== مساعدات عامة ===== */
+  const $ = (s,p=document)=>p.querySelector(s);
+  const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
+  const toast = (msg)=>{ const t=document.getElementById('toast'); t.querySelector('span').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); };
+  const pad = n => String(n).padStart(2,'0');
+  const todayISO = ()=>{ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+  const nowHM = ()=>{ const d=new Date(); return d.toTimeString().slice(0,5); };
 
-  // عناصر DOM
+  /* ===== تبويبات ===== */
+  const tabs = $$('.tab');
+  const panels = { dept: $('#tab-dept'), mgr: $('#tab-mgr') };
+  function activate(name){
+    tabs.forEach(t=>{
+      const on = t.dataset.tab===name;
+      t.classList.toggle('is-active', on);
+      t.setAttribute('aria-selected', on?'true':'false');
+    });
+    Object.entries(panels).forEach(([k,el])=>{
+      el.classList.toggle('is-active', k===name);
+    });
+    localStorage.setItem('mgr:view', name);
+  }
+  tabs.forEach(t=> t.addEventListener('click', ()=> activate(t.dataset.tab)));
+
+  /* ===== تخزين ===== */
+  const MGR_KEY = 'mgr_records_v1';      // { 'YYYY-MM-DD': [rows] }
+  const DEPT_KEY = 'mgr_dept';
+  const FINAL_KEY = 'mgr_finalized_v1';
+
+  const load = (k, fb)=> { try{return JSON.parse(localStorage.getItem(k) || fb);}catch(_){return JSON.parse(fb);} };
+  const save = (k, obj)=> localStorage.setItem(k, JSON.stringify(obj));
+
+  /* ===== عناصر عامة (تبويب الإدارة) ===== */
   const dayEl = document.getElementById('day');
   const deptEl = document.getElementById('dept');
   const tbody = document.getElementById('tbody');
   const empty = document.getElementById('empty');
   const summary = document.getElementById('summary');
   const searchEl = document.getElementById('search');
-
   const addRowBtn = document.getElementById('addRow');
   const saveBtn = document.getElementById('saveDay');
   const exportBtn = document.getElementById('exportCSV');
   const finalizeBtn = document.getElementById('finalize');
 
-  const toast = (msg)=>{ const t=document.getElementById('toast'); t.querySelector('span').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); };
-  const pad = n => String(n).padStart(2,'0');
-  const todayISO = ()=>{ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
-
-  // تخزين/قراءة JSON
-  const load = (k, fb)=> { try{return JSON.parse(localStorage.getItem(k) || fb);}catch(_){return JSON.parse(fb);} };
-  const save = (k, obj)=> localStorage.setItem(k, JSON.stringify(obj));
-
-  // تهيئة التاريخ من URL أو اليوم
   const params = new URLSearchParams(location.search);
   dayEl.value = params.get('date') || todayISO();
-
-  // تهيئة الإدارة
   deptEl.value = localStorage.getItem(DEPT_KEY) || '';
   deptEl.addEventListener('input', ()=> localStorage.setItem(DEPT_KEY, deptEl.value));
 
-  // قراءة/كتابة يوم
   function getDayRows(date){
     const all = load(MGR_KEY, '{}');
     return all[date] || [];
@@ -153,7 +263,7 @@
     save(MGR_KEY, all);
   }
 
-  // دمج سجل وارد من صفحة الموظف (sessionStorage)
+  /* ===== دمج سجل وارد من صفحة الموظف ===== */
   function mergeIncoming(){
     const raw = sessionStorage.getItem('last_attendance_payload');
     if(!raw) return false;
@@ -172,23 +282,21 @@
       rows[idx].insiraf = insiraf || rows[idx].insiraf;
       if(!rows[idx].rank) rows[idx].rank = rank;
     }else{
-      rows.push({
-        id: crypto.randomUUID(),
-        name, rank,
-        hudur, insiraf,
-        status: '', // يحددها المدير
-        note: ''
-      });
+      rows.push({ id: crypto.randomUUID(), name, rank, hudur, insiraf, status:'', note:'' });
     }
     setDayRows(dayEl.value, rows);
     sessionStorage.removeItem('last_attendance_payload');
     return true;
   }
 
-  // بناء صف
+  /* ===== بناء صف جدول الإدارة ===== */
+  function statusClass(v){
+    return v==='حاضر'?'row-present' : v==='متأخر'?'row-late' : v==='غياب'?'row-absent' : v==='إجازة'?'row-leave' : v==='استئذان'?'row-permit' : '';
+  }
   function buildRow(r){
     const tr = document.createElement('tr');
     tr.dataset.id = r.id;
+    if(r.status) tr.classList.add(statusClass(r.status));
 
     const tdName = document.createElement('td');
     const inName = document.createElement('input'); inName.type='text'; inName.value=r.name||'';
@@ -222,23 +330,22 @@
     const del = document.createElement('button'); del.className='btn ghost'; del.textContent='حذف';
     tdAct.appendChild(del);
 
-    // حفظ فوري عند التغيير
-    [inName,inRank,inHud,inIns,sel,inNote].forEach(el=>{
-      el.addEventListener('change', ()=> {
-        const rows = getDayRows(dayEl.value);
-        const i = rows.findIndex(x=>x.id===r.id);
-        if(i>=0){
-          rows[i].name = inName.value.trim();
-          rows[i].rank = inRank.value.trim();
-          rows[i].hudur = inHud.value;
-          rows[i].insiraf = inIns.value;
-          rows[i].status = sel.value;
-          rows[i].note = inNote.value.trim();
-          setDayRows(dayEl.value, rows);
-          renderSummary(rows);
-        }
-      });
-    });
+    function persist(){
+      const rows = getDayRows(dayEl.value);
+      const i = rows.findIndex(x=>x.id===r.id);
+      if(i>=0){
+        rows[i].name = inName.value.trim();
+        rows[i].rank = inRank.value.trim();
+        rows[i].hudur = inHud.value;
+        rows[i].insiraf = inIns.value;
+        rows[i].status = sel.value;
+        rows[i].note = inNote.value.trim();
+        setDayRows(dayEl.value, rows);
+        renderSummary(rows);
+        tr.className=''; if(sel.value) tr.classList.add(statusClass(sel.value));
+      }
+    }
+    [inName,inRank,inHud,inIns,sel,inNote].forEach(el=> el.addEventListener('change', persist));
 
     del.addEventListener('click', ()=>{
       let rows = getDayRows(dayEl.value);
@@ -251,7 +358,7 @@
     return tr;
   }
 
-  // رسم الجدول
+  /* ===== رسم جدول الإدارة ===== */
   function render(){
     const q = searchEl.value.trim();
     const rows = getDayRows(dayEl.value);
@@ -277,8 +384,8 @@
     summary.textContent = `الإجمالي: ${total} | حاضر: ${count('حاضر')} | متأخر: ${count('متأخر')} | غياب: ${count('غياب')} | إجازة: ${count('إجازة')} | استئذان: ${count('استئذان')}`;
   }
 
-  // أحداث عامة
-  dayEl.addEventListener('change', ()=> { render(); });
+  /* ===== أزرار الإدارة ===== */
+  dayEl.addEventListener('change', ()=> render());
   searchEl.addEventListener('input', ()=> render());
 
   addRowBtn.addEventListener('click', ()=>{
@@ -288,8 +395,7 @@
     render();
   });
 
-  saveBtn.addEventListener('click', ()=>{ toast('تم حفظ اليوم.'); });
-
+  saveBtn.addEventListener('click', ()=> toast('تم حفظ اليوم.'));
   exportBtn.addEventListener('click', ()=>{
     const rows = getDayRows(dayEl.value);
     const head = ['الاسم','المرتبة','الحضور','الانصراف','الحالة','ملاحظات'];
@@ -304,7 +410,6 @@
     a.href=url; a.download=`attendance_${dayEl.value}.csv`; a.click();
     URL.revokeObjectURL(url);
   });
-
   finalizeBtn.addEventListener('click', ()=>{
     const finAll = load(FINAL_KEY,'{}');
     if(finAll[dayEl.value]){ toast('تم توجيه هذا اليوم مسبقًا.'); return; }
@@ -314,9 +419,97 @@
     toast('تم التوجيه للموارد البشرية 🎯');
   });
 
-  // دمج السجل الوارد (إن وجد) ثم ارسم
+  /* ===== تبويب: حضور المدير ===== */
+  const mgrSelfName = document.getElementById('mgrSelfName');
+  const mgrSelfRank = document.getElementById('mgrSelfRank');
+  const mgrSelfTime = document.getElementById('mgrSelfTime');
+  const mgrSelfReq  = document.getElementById('mgrSelfReq');
+  const mgrSelfIn   = document.getElementById('mgrSelfIn');
+  const mgrSelfOut  = document.getElementById('mgrSelfOut');
+  const mgrSelfLog  = document.getElementById('mgrSelfLog');
+
+  function reqLabel(v){ return v==='partial'?'استئذان جزئي' : v==='full'?'استئذان كلي' : v==='leave'?'إجازة' : ''; }
+  function keySelf(prefix){ return `${prefix}:${dayEl.value}:mgrSelf`; }
+  function loadSelfLog(){
+    mgrSelfLog.innerHTML='';
+    const arr = load(keySelf('mgrSelfLog'), '[]');
+    arr.forEach(item=>{ const li=document.createElement('li'); li.textContent=item; mgrSelfLog.appendChild(li); });
+  }
+  function pushSelfLog(text){
+    const arr = load(keySelf('mgrSelfLog'), '[]');
+    arr.push(text); save(keySelf('mgrSelfLog'), arr); loadSelfLog();
+  }
+  function ensureManagerRow(){
+    const name = (mgrSelfName.value||'').trim(); const rank = (mgrSelfRank.value||'').trim();
+    if(!name) return null;
+    let rows = getDayRows(dayEl.value);
+    let r = rows.find(x => (x.name||'').trim() === name);
+    if(!r){ r = { id: crypto.randomUUID(), name, rank, hudur:'', insiraf:'', status:'', note:'' }; rows.push(r); }
+    else if(rank && !r.rank){ r.rank = rank; }
+    setDayRows(dayEl.value, rows); return r.id;
+  }
+  function setManagerHudur(time){
+    const id = ensureManagerRow(); if(!id) return;
+    let rows = getDayRows(dayEl.value); const i = rows.findIndex(x=>x.id===id);
+    if(i>=0){ rows[i].hudur = time; setDayRows(dayEl.value, rows); render(); }
+  }
+  function setManagerInsiraf(time){
+    const id = ensureManagerRow(); if(!id) return;
+    let rows = getDayRows(dayEl.value); const i = rows.findIndex(x=>x.id===id);
+    if(i>=0){ rows[i].insiraf = time; setDayRows(dayEl.value, rows); render(); }
+  }
+
+  function hydrateManagerIdentity(){
+    const p = new URLSearchParams(location.search);
+    const storedName = localStorage.getItem('managerName') || '';
+    const storedRank = localStorage.getItem('managerRank') || '';
+    const finalName = (p.get('name')||storedName||'').trim();
+    const finalRank = (p.get('rank')||storedRank||'').trim();
+    if(finalName) localStorage.setItem('managerName', finalName);
+    if(finalRank) localStorage.setItem('managerRank', finalRank);
+    mgrSelfName.value = finalName;
+    mgrSelfRank.value = finalRank;
+  }
+
+  function initSelfPanel(){
+    if(!mgrSelfTime) return;
+    mgrSelfTime.value = nowHM();
+    hydrateManagerIdentity();
+    loadSelfLog();
+
+    [mgrSelfName, mgrSelfRank].forEach(el=>{
+      el && el.addEventListener('change', ()=>{
+        if(el===mgrSelfName) localStorage.setItem('managerName', (mgrSelfName.value||'').trim());
+        if(el===mgrSelfRank) localStorage.setItem('managerRank', (mgrSelfRank.value||'').trim());
+      });
+    });
+
+    mgrSelfIn && mgrSelfIn.addEventListener('click', ()=>{
+      const n = (mgrSelfName.value||'مدير').trim();
+      const r = (mgrSelfRank.value||'—').trim();
+      const t = mgrSelfTime.value || nowHM();
+      const extra = reqLabel(mgrSelfReq.value);
+      pushSelfLog(`حضور: ${n} (${r}) عند ${t}${extra?(' — '+extra):''}`);
+      setManagerHudur(t);
+      toast('تم تسجيل حضور المدير');
+    });
+
+    mgrSelfOut && mgrSelfOut.addEventListener('click', ()=>{
+      const n = (mgrSelfName.value||'مدير').trim();
+      const r = (mgrSelfRank.value||'—').trim();
+      const t = mgrSelfTime.value || nowHM();
+      const extra = reqLabel(mgrSelfReq.value);
+      pushSelfLog(`انصراف: ${n} (${r}) عند ${t}${extra?(' — '+extra):''}`);
+      setManagerInsiraf(t);
+      toast('تم تسجيل انصراف المدير');
+    });
+  }
+
+  /* ===== بدء التشغيل ===== */
+  activate(localStorage.getItem('mgr:view') || 'dept'); // افتراضي: تحضير الإدارة
   mergeIncoming();
   render();
+  initSelfPanel();
 })();
 </script>
 </body>
