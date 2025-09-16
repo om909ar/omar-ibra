@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>الحضور والانصراف</title>
+  <title>الحضور والانصراف – الموظف</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- نفس ملفك السابق للألوان والتنسيق -->
   <link rel="stylesheet" href="attendance.css">
 </head>
 <body>
   <div class="wrap">
+
+    <!-- رأس الصفحة: التاريخ + معلومات الحساب (قراءة فقط) -->
     <header class="head">
       <h1>الحضور والانصراف</h1>
       <div class="meta">
         <label>تاريخ اليوم:
           <input type="date" id="attDate">
         </label>
-        <!-- عرض اسم الحساب ومرتبته (قراءة فقط) -->
         <div class="account">
           <div class="acc-line"><span class="tag">الاسم:</span> <b id="accName">—</b></div>
           <div class="acc-line"><span class="tag">المرتبة:</span> <b id="accRank">—</b></div>
@@ -24,99 +26,64 @@
       </div>
     </header>
 
+    <!-- ===== صفحة الموظف المبسطة ===== -->
     <main class="layout">
-      <!-- لوحة المدير في اليمين -->
-      <aside class="side" id="managerPanel">
-        <h2 class="panel-title">تحضير الإدارة</h2>
-        <div class="hint">هذه الأدوات للمدير.</div>
-        <div class="row">
-          <label>القسم/الإدارة
-            <input type="text" id="deptName" placeholder="اسم الإدارة">
-          </label>
-        </div>
 
-        <table class="tbl" id="mgrTable" aria-label="قائمة الموظفين">
-          <thead>
-            <tr><th>الموظف</th><th>الحالة</th><th>ملاحظات</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div class="row end">
-          <button id="btnAddRow" class="btn ghost">
-            <!-- plus icon -->
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-            <span>إضافة موظف</span>
-          </button>
-          <button id="btnFinalize" class="btn primary">
-            <!-- send icon -->
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>
-            <span>توجيه الحضور للموارد البشرية</span>
-          </button>
-        </div>
-        <div id="finalMsg" class="final" hidden></div>
-      </aside>
-
-      <!-- الأدوات في الوسط -->
+      <!-- لوحة الموظف فقط (بدون أي أدوات مدير أو طلبات) -->
       <section class="panel center" id="employeePanel">
-        <h2 class="panel-title">بيانات الموظف</h2>
-        <div class="row">
-          <label>الاسم
-            <input type="text" id="empName" placeholder="اسم الموظف">
-          </label>
-          <label>المرتبة/الدرجة
-            <input type="text" id="empRank" placeholder="مثال: المرتبة السادسة">
-          </label>
+        <h2 class="panel-title">صفحة الموظف</h2>
+
+        <!-- شبكة الدائرتين في منتصف الصفحة -->
+        <div class="circles-grid" aria-label="أزرار التحضير والانصراف">
+          <!-- دائرة تحضير -->
+          <div class="circle-block">
+            <div class="circle hudur" id="hudCircle" tabindex="0" role="button" aria-label="اختيار وقت التحضير">
+              <div class="circle-label">تحضير</div>
+            </div>
+            <div class="circle-meta">
+              آخر تحضير: <span class="time" id="hudTime">—</span>
+            </div>
+            <!-- منتقي الوقت اليدوي للتحضير (نفتحه بالضغط على الدائرة أو الزر) -->
+            <input id="hudPicker" type="time" hidden>
+            <div class="circle-actions">
+              <button class="btn primary" id="hudSet">تحديد وقت التحضير يدويًا</button>
+              <button class="btn ghost" id="hudClear">مسح</button>
+            </div>
+          </div>
+
+          <!-- دائرة انصراف -->
+          <div class="circle-block">
+            <div class="circle insiraf" id="insCircle" tabindex="0" role="button" aria-label="اختيار وقت الانصراف">
+              <div class="circle-label">انصراف</div>
+            </div>
+            <div class="circle-meta">
+              آخر انصراف: <span class="time" id="insTime">—</span>
+            </div>
+            <!-- منتقي الوقت اليدوي للانصراف -->
+            <input id="insPicker" type="time" hidden>
+            <div class="circle-actions">
+              <button class="btn accent" id="insSet">تحديد وقت الانصراف يدويًا</button>
+              <button class="btn ghost" id="insClear">مسح</button>
+            </div>
+          </div>
         </div>
 
-        <h3 class="sub">التحضير</h3>
-        <div class="row">
-          <label>الوقت
-            <input type="time" id="checkTime">
-          </label>
-          <button id="btnCheckIn" class="btn primary">
-            <!-- check-in icon -->
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-            <span>تسجيل حضور</span>
-          </button>
-          <button id="btnCheckOut" class="btn">
-            <!-- checkout icon -->
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M10 17l5-5-5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M4 12h10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-            <span>تسجيل انصراف</span>
-          </button>
+        <!-- أزرار عامة أسفل الدائرتين -->
+        <div class="actions">
+          <!-- لاحقًا بالـJS بنخليه يرسل للمدير / يفتح صفحة المدير مع التاريخ -->
+          <a id="sendToManager" class="btn" href="#" aria-label="إرسال الحضور لصفحة المدير">إرسال لصفحة المدير</a>
+          <button id="resetDay" class="btn ghost">إعادة تعيين اليوم</button>
         </div>
 
-        <h3 class="sub">الطلبات</h3>
-        <div class="row">
-          <label>نوع الطلب
-            <select id="reqType">
-              <option value="">— اختر —</option>
-              <option value="partial">استئذان جزئي</option>
-              <option value="full">استئذان كلي</option>
-              <option value="leave">إجازة</option>
-            </select>
-          </label>
-          <label>من
-            <input type="time" id="fromTime">
-          </label>
-          <label>إلى
-            <input type="time" id="toTime">
-          </label>
-          <button id="btnAddReq" class="btn">
-            <!-- add doc icon -->
-            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M9 14h6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-            <span>إضافة الطلب</span>
-          </button>
-        </div>
-
-        <div class="list">
-          <h3 class="sub">سجل اليوم</h3>
-          <ul id="empLog" class="log"></ul>
-        </div>
+        <p class="hint">
+          ملاحظة: لا يتم أخذ “الوقت الآن” تلقائيًا. يجب اختيار الوقت يدويًا لكل من التحضير والانصراف.
+        </p>
       </section>
+
     </main>
   </div>
 
-  <script src="attendance.js"></script>
+  <!-- سنضيف attendance.js المعدّل في الخطوة التالية لبرمجة السلوك -->
+  <!-- <script src="attendance.js"></script> -->
 </body>
 </html>
